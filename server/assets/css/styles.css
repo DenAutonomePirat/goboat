@@ -1,0 +1,53 @@
+p {
+    font-family: "´Georgia";
+}
+
+#content {
+	height: 100%;
+	width: 100%;
+
+}
+#mapdiv {
+	margin-right: 308px;
+	height:400px;
+}
+#videodiv {
+	margin-top: 8px;
+	margin-right: 308px;
+	height: 300px;
+}
+
+#map {
+	height:100%;
+	width: 100%;
+
+}
+#video {
+	height: 100%;
+	float: right;
+}
+
+#model {
+	height: 100%;
+	width: 50%;
+	float: right;	
+	}
+#modelSTL{
+	width: 100%;
+	height: 100%;
+}
+#chart{
+	width: 50%;
+	height: 100%;
+	float: right;
+
+}
+#chat {
+	padding-top: 8px;
+	padding-right: 8px;
+	height: 600px;
+	width: 300px;
+	position:absolute;
+	top:0;
+	right:0;
+}
