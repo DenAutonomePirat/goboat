@@ -4,6 +4,8 @@ var camera, scene, renderer;
 var cube, plane, mesh;
 
 var targetRotation;
+var targetLat;
+var targetLon;
 var targetRotationOnMouseDown = 0;
 
 var mouseX = 0;
@@ -249,16 +251,14 @@ function onDocumentMouseDown( event ) {
 	document.addEventListener( 'mouseout', onDocumentMouseOut, false );
 
 	mouseXOnMouseDown = event.clientX - windowHalfX;
-	targetRotationOnMouseDown = targetRotation;
-
+	
 }
 
 function onDocumentMouseMove( event ) {
 
 	mouseX = event.clientX - windowHalfX;
 
-	targetRotation = targetRotationOnMouseDown + ( mouseX - mouseXOnMouseDown ) * 0.02;
-
+	
 }
 
 function onDocumentMouseUp( event ) {
@@ -284,8 +284,7 @@ function onDocumentTouchStart( event ) {
 		event.preventDefault();
 
 		mouseXOnMouseDown = event.touches[ 0 ].pageX - windowHalfX;
-		targetRotationOnMouseDown = targetRotation;
-
+	
 	}
 
 }
@@ -297,7 +296,6 @@ function onDocumentTouchMove( event ) {
 		event.preventDefault();
 
 		mouseX = event.touches[ 0 ].pageX - windowHalfX;
-		targetRotation = targetRotationOnMouseDown + ( mouseX - mouseXOnMouseDown ) * 0.05;
 
 	}
 
@@ -316,7 +314,7 @@ function animate() {
 
 function render() {
 	var xAxis = new THREE.Vector3(0,1,0);
-	rotateAroundWorldAxis(mesh, xAxis, targetRotation);
+	rotateAroundWorldAxis(mesh, xAxis, -targetRotation);
 	//plane.rotation.y = cube.rotation.y += ( targetRotation - cube.rotation.y ) * 0.05;
 	renderer.render( scene, camera );
 

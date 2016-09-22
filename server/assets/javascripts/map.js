@@ -96,7 +96,7 @@ var markerFinish = L.marker([56.96487, 10.36663],{
 markerFinish.addTo(map);
 
 
-var marker1 = L.marker([56.72052, 8.21297],{
+var marker1 = L.marker([targetLat, targetLon],{
     draggable:true,
     icon: self,
     iconAngle: targetRotation
@@ -147,6 +147,6 @@ function onMapClick(e) {
 map.on('click', onMapClick);
 
 setInterval(function () {
-    marker1.setIconAngle(-targetRotation/Math.PI*180);
+    marker1.setIconAngle(targetRotation/Math.PI*180);
     route.setLatLngs([marker1.getLatLng(),marker2.getLatLng(),marker3.getLatLng(),markerFinish.getLatLng()]);
 }, 100);
