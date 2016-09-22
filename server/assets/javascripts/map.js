@@ -148,7 +148,7 @@ function onMapClick(e) {
 
 map.on('click', onMapClick);
 
-setInterval(function () {
+update(function () {
     marker1.setIconAngle(targetRotation/Math.PI*180,targetLat,targetLon);
     route.setLatLngs([marker1.getLatLng(),marker2.getLatLng(),marker3.getLatLng(),markerFinish.getLatLng()]);
 }, 100);
