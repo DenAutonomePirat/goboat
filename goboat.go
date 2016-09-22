@@ -3,23 +3,25 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
+	"github.com/stratoberry/go-gpsd"
 	"github.com/tarm/serial"
 	"log"
 )
 
 type Boat struct {
-	Id          int32   `json:"id"`
-	Rudder      int32   `json:"rudder"`
-	Depth       float32 `json:"depth"`
-	MainSail    int32   `json:"mainsail"`
-	Jib         int32   `json:"jib"`
-	Volts       float32 `json:"volts`
-	Amperes     float32 `json:"amperes"`
-	JoulesTotal float32 `json:"joules_total"`
-	joulesTrip  float32 `json:"joules_trip"`
-	Heading     float32 `json:"heading"`
+	Id          int32   `json:"id",omitempty`
+	Rudder      int32   `json:"rudder",omitempty`
+	Depth       float32 `json:"depth",omitempty`
+	MainSail    int32   `json:"mainsail",omitempty`
+	Jib         int32   `json:"jib",omitempty`
+	Volts       float32 `json:"volts",omitempty`
+	Amperes     float32 `json:"amperes,omitempty"`
+	JoulesTotal float32 `json:"joules_total,omitempty"`
+	joulesTrip  float32 `json:"joules_trip,omitempty"`
+	Heading     float32 `json:"heading,omitempty"`
 	Pitch       float32 `json:"pitch,omitempty"`
-	Roll        float32 `json:"roll"`
+	Roll        float32 `json:"roll,omitempty"`
 }
 
 func (b *Boat) Marshal() *[]byte {
@@ -58,4 +60,31 @@ func Ingest(s string, message chan Muxable) {
 			message <- currentBoat
 		}
 	}
+}
+
+func IngestGPSD() {
+
+	var gps *gpsd.Session
+	var err error
+
+	if gps, err = gpsd.Dial("gpsd.DefaultAddress"); err != nil {
+		panic(fmt.Sprintf("Failed to connect to GPSD: ", err))
+	}
+
+	gps.AddFilter("TPV", func(r interface{}) {
+		tpv := r.(*gpsd.TPVReport)
+		fmt.Println("TPV", tpv.Mode, tpv.Time)
+	})
+
+	skyfilter := func(r interface{}) {
+		sky := r.(*gpsd.SKYReport)
+
+		fmt.Println("SKY", len(sky.Satellites), "satellites")
+	}
+
+	gps.AddFilter("SKY", skyfilter)
+
+	done := gps.Watch()
+	<-done
+
 }
