@@ -22,6 +22,8 @@ type Boat struct {
 	Heading     float32 `json:"heading,omitempty"`
 	Pitch       float32 `json:"pitch,omitempty"`
 	Roll        float32 `json:"roll,omitempty"`
+	Lat         float32 `json:"lat,omitempty"`
+	Lon         float32 `json:"lon,omitempty"`
 }
 
 func (b *Boat) Marshal() *[]byte {
@@ -62,27 +64,22 @@ func Ingest(s string, message chan Muxable) {
 	}
 }
 
-func IngestGPSD() {
+func IngestGPSD(message chan Muxable) {
 
 	var gps *gpsd.Session
 	var err error
 
-	if gps, err = gpsd.Dial("gpsd.DefaultAddress"); err != nil {
+	if gps, err = gpsd.Dial(gpsd.DefaultAddress); err != nil {
 		panic(fmt.Sprintf("Failed to connect to GPSD: ", err))
 	}
 
 	gps.AddFilter("TPV", func(r interface{}) {
 		tpv := r.(*gpsd.TPVReport)
-		fmt.Println("TPV", tpv.Mode, tpv.Time)
+		currentBoat := NewBoat()
+		currentBoat.Lat = float32(tpv.Lat)
+		currentBoat.Lon = float32(tpv.Lon)
+		message <- currentBoat
 	})
-
-	skyfilter := func(r interface{}) {
-		sky := r.(*gpsd.SKYReport)
-
-		fmt.Println("SKY", len(sky.Satellites), "satellites")
-	}
-
-	gps.AddFilter("SKY", skyfilter)
 
 	done := gps.Watch()
 	<-done

@@ -39,7 +39,7 @@ func main() {
 	ingestChannel := make(chan Muxable)
 
 	go Ingest(*port, ingestChannel)
-	go IngestGPSD()
+	go IngestGPSD(ingestChannel)
 
 	go func() {
 		defer c.Close()

@@ -36,18 +36,20 @@ func main() {
 }
 
 type Boat struct {
-	Id          int32   `json:"id"`
-	Rudder      int32   `json:"rudder"`
-	Depth       float32 `json:"depth"`
-	MainSail    int32   `json:"mainsail"`
-	Jib         int32   `json:"jib"`
-	Volts       float32 `json:"volts`
-	Amperes     float32 `json:"amperes"`
-	JoulesTotal float32 `json:"joules_total"`
-	joulesTrip  float32 `json:"joules_trip"`
-	Heading     float32 `json:"heading"`
+	Id          int32   `json:"id",omitempty`
+	Rudder      int32   `json:"rudder",omitempty`
+	Depth       float32 `json:"depth",omitempty`
+	MainSail    int32   `json:"mainsail",omitempty`
+	Jib         int32   `json:"jib",omitempty`
+	Volts       float32 `json:"volts",omitempty`
+	Amperes     float32 `json:"amperes,omitempty"`
+	JoulesTotal float32 `json:"joules_total,omitempty"`
+	joulesTrip  float32 `json:"joules_trip,omitempty"`
+	Heading     float32 `json:"heading,omitempty"`
 	Pitch       float32 `json:"pitch,omitempty"`
-	Roll        float32 `json:"roll"`
+	Roll        float32 `json:"roll,omitempty"`
+	Lat         float32 `json:"lat,omitempty"`
+	Lon         float32 `json:"lon,omitempty"`
 }
 
 func (b *Boat) Marshal() *[]byte {
