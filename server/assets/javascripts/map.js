@@ -98,8 +98,8 @@ var markerFinish = L.marker([56.96487, 10.36663],{
 markerFinish.addTo(map);
 
 
-var marker1 = L.marker([56.72052, 8.21297],{
-    draggable:true,
+var marker1 = L.marker([targetLat, targetLon],{
+    draggable:false,
     icon: self,
     iconAngle: targetRotation
 })
