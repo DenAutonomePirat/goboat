@@ -16,10 +16,10 @@
             i.style[L.DomUtil.TRANSFORM] += transform;
         },
 
-        update: function (iconAngle,lat,lon) {
+        setIconAngle: function (iconAngle,lat,lon) {
             this.options.iconAngle = iconAngle;
-            this.options.lat=lat;
-            this.options.lon=lon;
+            this.options.lat = lat;
+            this.options.lon = lon;
             if (this._map)
                 this.update();
         },
@@ -98,8 +98,8 @@ var markerFinish = L.marker([56.96487, 10.36663],{
 markerFinish.addTo(map);
 
 
-var marker1 = L.marker([targetLat, targetLon],{
-    draggable:false,
+var marker1 = L.marker([56.72052, 8.21297],{
+    draggable:true,
     icon: self,
     iconAngle: targetRotation
 })
@@ -148,7 +148,8 @@ function onMapClick(e) {
 
 map.on('click', onMapClick);
 
-update(function () {
-    marker1.setIconAngle(targetRotation/Math.PI*180,targetLat,targetLon);
+setInterval(function () {
+    marker1.setIconAngle(-targetRotation/Math.PI*180,targetLat,targetLon);
+
     route.setLatLngs([marker1.getLatLng(),marker2.getLatLng(),marker3.getLatLng(),markerFinish.getLatLng()]);
 }, 100);
