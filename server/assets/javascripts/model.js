@@ -314,7 +314,7 @@ function animate() {
 
 function render() {
 	var xAxis = new THREE.Vector3(0,1,0);
-	rotateAroundWorldAxis(mesh, xAxis, -targetRotation);
+	rotateAroundWorldAxis(mesh, xAxis, targetRotation);
 	//plane.rotation.y = cube.rotation.y += ( targetRotation - cube.rotation.y ) * 0.05;
 	renderer.render( scene, camera );
 
