@@ -1,3 +1,6 @@
+
+
+
 var container, stats;
 var camera, scene, renderer;
 
@@ -25,9 +28,15 @@ var parameters = {
 			
 			var waterNormals;
 
+
+
+
+$( document ).ready(function(){
+
 init();
 animate();
 
+});
 function init() {
 
 	container = document.getElementById("modelSTL");

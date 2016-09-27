@@ -1,15 +1,19 @@
 p {
-    font-family: "´Georgia";
+    font-family: "Georgia";
 }
 
-#content {
-	height: 100%;
-	width: 100%;
-
+html, body
+{
+    height: 100%;
 }
+
 #mapdiv {
 	margin-right: 308px;
-	height:400px;
+	height:100%;
+}
+#map {
+	height:100%;
+	width: 100%;
 }
 #model {
 	height: 200px;
@@ -28,22 +32,12 @@ p {
 	height: 300px;
 }
 
-#map {
-	height:100%;
-	width: 100%;
-}
 
 #video {
 	height: 100%;
 	float: right;
 }
 
-#chart{
-	width: 50%;
-	height: 100%;
-	float: right;
-
-}
 #chat {
 	padding-top: 8px;
 	padding-right: 8px;
