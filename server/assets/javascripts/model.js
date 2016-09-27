@@ -176,7 +176,7 @@ function init() {
 	// scene.add( plane );
 
 	renderer = new THREE.WebGLRenderer({ alpha: true } );
-	renderer.setClearColor( 0xffffff );
+	renderer.setClearColor( 0x000000,0 );
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize(container.offsetWidth, container.offsetHeight);
 
