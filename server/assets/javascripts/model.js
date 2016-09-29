@@ -6,11 +6,6 @@ var camera, scene, renderer;
 
 var cube, plane, mesh;
 
-var targetRotation;
-var targetLat;
-var targetLon;
-var targetRotationOnMouseDown = 0;
-
 var mouseX = 0;
 var mouseXOnMouseDown = 0;
 
@@ -324,6 +319,10 @@ function animate() {
 function render() {
 	var xAxis = new THREE.Vector3(0,1,0);
 	rotateAroundWorldAxis(mesh, xAxis, targetRotation);
+	var yAxis = new THREE.Vector3(1,0,0);
+	rotateAroundWorldAxis(mesh, yAxis, targetRoll);
+	var zAxis = new THREE.Vector3(0,0,1);
+	rotateAroundWorldAxis(mesh, zAxis, targetPitch);
 	//plane.rotation.y = cube.rotation.y += ( targetRotation - cube.rotation.y ) * 0.05;
 	renderer.render( scene, camera );
 
