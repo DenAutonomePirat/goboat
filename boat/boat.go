@@ -74,10 +74,10 @@ type Boat struct {
 	Roll        float32 `json:"roll,omitempty"`
 	Lat         float32 `json:"lat,omitempty"`
 	Lon         float32 `json:"lon,omitempty"`
-	q0          float32 `json:"q0,omitempty"`
-	q1          float32 `json:"q1,omitempty"`
-	q2          float32 `json:"q2,omitempty"`
-	q3          float32 `json:"q3,omitempty"`
+	Q0          float32 `json:"q0"`
+	Q1          float32 `json:"q1"`
+	Q2          float32 `json:"q2"`
+	Q3          float32 `json:"q3"`
 }
 
 func (b *Boat) Marshal() *[]byte {

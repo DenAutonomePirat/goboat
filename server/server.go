@@ -14,7 +14,7 @@ func Listen() {
 	log.SetFlags(0)
 
 	web := NewWeb()
-	//measurements := make(chan Muxable)
+
 	//users := NewStore()
 	//defer users.db.Close()
 	go func() {

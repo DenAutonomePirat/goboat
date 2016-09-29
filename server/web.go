@@ -18,19 +18,13 @@ func (w *Web) ListenAndServe() {
 
 	r := gin.Default()
 
-	r.Static("/assets", "./assets")
-	r.Static("/css", "./assets/css")
-	r.Static("/javascripts", "./assets/javascripts")
-	r.Static("/images", "./assets/images")
+	r.Static("/assets", "./server/assets")
+	r.Static("/css", "./server/assets/css")
+	r.Static("/javascripts", "./server/assets/javascripts")
+	r.Static("/images", "./server/assets/images")
 
 	r.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/assets/index.html")
-	})
-
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
+		c.Redirect(http.StatusMovedPermanently, "/server/assets/index.html")
 	})
 
 	r.GET("/ws", func(c *gin.Context) {

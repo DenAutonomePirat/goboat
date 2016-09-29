@@ -17,8 +17,6 @@ var port = flag.String("port", "/dev/ttyACM0", "ingest port /dev/someport")
 
 func main() {
 	fmt.Println("Morning")
-	Self := boat.NewBoat()
-	Self.Id = 129
 
 	flag.Parse()
 	log.SetFlags(0)
@@ -54,9 +52,6 @@ func main() {
 		}
 	}()
 
-	//ticker := time.NewTicker(time.Second * 5)
-	//defer ticker.Stop()
-
 	var muxable boat.Muxable
 	var msg *[]byte
 
@@ -70,14 +65,7 @@ func main() {
 				log.Println("write:", err)
 				return
 			}
-		/*case <-ticker.C:
-		err := c.WriteMessage(websocket.TextMessage, *Self.Marshal())
-		fmt.Print(".")
-		if err != nil {
-			log.Println("write:", err)
-			return
-		}
-		*/
+
 		case <-interrupt:
 			log.Println("interrupt")
 			// To cleanly close a connection, a client should send a close
