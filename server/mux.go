@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	//"flag"
@@ -8,14 +8,14 @@ import (
 	//"os"
 	//"os/signal"
 	//"time"
-
+	"github.com/denautonomepirat/goboat/boat"
 	"github.com/gorilla/websocket"
 )
 
 type Mux struct {
 	connections map[*Conn]bool
 
-	Broadcast chan Muxable
+	Broadcast chan boat.Muxable
 
 	Recieve chan []byte
 
@@ -24,14 +24,10 @@ type Mux struct {
 	unregister chan *Conn
 }
 
-type Muxable interface {
-	Marshal() *[]byte
-}
-
 func NewMux() *Mux {
 
 	mux := Mux{connections: make(map[*Conn]bool),
-		Broadcast:  make(chan Muxable),
+		Broadcast:  make(chan boat.Muxable),
 		Recieve:    make(chan []byte),
 		register:   make(chan *Conn),
 		unregister: make(chan *Conn),
@@ -43,7 +39,7 @@ func NewMux() *Mux {
 
 func (m *Mux) loop() {
 	var conn *Conn
-	var muxable Muxable
+	var muxable boat.Muxable
 	var msg *[]byte
 	for {
 		select {

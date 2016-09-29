@@ -1,87 +1,98 @@
 package main
 
 import (
-	"bufio"
-	"encoding/json"
+	"flag"
 	"fmt"
-	"github.com/stratoberry/go-gpsd"
-	"github.com/tarm/serial"
+	"github.com/denautonomepirat/goboat/boat"
+	"github.com/gorilla/websocket"
 	"log"
+	"net/url"
+	"os"
+	"os/signal"
+	"time"
 )
 
-type Boat struct {
-	Id          int32   `json:"id",omitempty`
-	Rudder      int32   `json:"rudder",omitempty`
-	Depth       float32 `json:"depth",omitempty`
-	MainSail    int32   `json:"mainsail",omitempty`
-	Jib         int32   `json:"jib",omitempty`
-	Volts       float32 `json:"volts",omitempty`
-	Amperes     float32 `json:"amperes,omitempty"`
-	JoulesTotal float32 `json:"joules_total,omitempty"`
-	joulesTrip  float32 `json:"joules_trip,omitempty"`
-	Heading     float32 `json:"heading,omitempty"`
-	Pitch       float32 `json:"pitch,omitempty"`
-	Roll        float32 `json:"roll,omitempty"`
-	Lat         float32 `json:"lat,omitempty"`
-	Lon         float32 `json:"lon,omitempty"`
-}
+var addr = flag.String("addr", "46.101.213.117:8080", "http service address")
+var port = flag.String("port", "/dev/ttyACM0", "ingest port /dev/someport")
 
-func (b *Boat) Marshal() *[]byte {
-	encoded, _ := json.Marshal(b)
-	return &encoded
-}
+func main() {
+	fmt.Println("Morning")
+	Self := boat.NewBoat()
+	Self.Id = 129
 
-func NewBoat() *Boat {
-	b := Boat{}
-	return &b
-}
+	flag.Parse()
+	log.SetFlags(0)
 
-func Ingest(s string, message chan Muxable) {
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt)
 
-	config := &serial.Config{
-		Name: s,
-		Baud: 115200,
-	}
-	arduino, err := serial.OpenPort(config)
+	u := url.URL{Scheme: "ws", Host: *addr, Path: "/ws"}
+	log.Printf("connecting to %s", u.String())
+
+	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("dial:", err)
 	}
-	defer arduino.Close()
 
-	reader := bufio.NewReader(arduino)
-	var token []byte
+	done := make(chan struct{})
+
+	ingestChannel := make(chan boat.Muxable)
+
+	go boat.Ingest(*port, ingestChannel)
+	go boat.IngestGPSD(ingestChannel)
+
+	go func() {
+		defer c.Close()
+		defer close(done)
+		for {
+			_, message, err := c.ReadMessage()
+			if err != nil {
+				log.Println("read:", err)
+				return
+			}
+			log.Printf("recv: %s", message)
+		}
+	}()
+
+	//ticker := time.NewTicker(time.Second * 5)
+	//defer ticker.Stop()
+
+	var muxable boat.Muxable
+	var msg *[]byte
 
 	for {
-		token, _, err = reader.ReadLine()
+		select {
+
+		case muxable = <-ingestChannel:
+			msg = muxable.Marshal()
+			err := c.WriteMessage(websocket.TextMessage, *msg)
+			if err != nil {
+				log.Println("write:", err)
+				return
+			}
+		/*case <-ticker.C:
+		err := c.WriteMessage(websocket.TextMessage, *Self.Marshal())
+		fmt.Print(".")
 		if err != nil {
-			panic(err)
+			log.Println("write:", err)
+			return
 		}
-		currentBoat := NewBoat()
-		err = json.Unmarshal(token, currentBoat)
-		if err == nil {
-			message <- currentBoat
+		*/
+		case <-interrupt:
+			log.Println("interrupt")
+			// To cleanly close a connection, a client should send a close
+			// frame and wait for the server to close the connection.
+			err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			if err != nil {
+				log.Println("write close:", err)
+				return
+			}
+			select {
+			case <-done:
+			case <-time.After(time.Second):
+			}
+			c.Close()
+			return
 		}
 	}
-}
-
-func IngestGPSD(message chan Muxable) {
-
-	var gps *gpsd.Session
-	var err error
-
-	if gps, err = gpsd.Dial(gpsd.DefaultAddress); err != nil {
-		panic(fmt.Sprintf("Failed to connect to GPSD: ", err))
-	}
-
-	gps.AddFilter("TPV", func(r interface{}) {
-		tpv := r.(*gpsd.TPVReport)
-		currentBoat := NewBoat()
-		currentBoat.Lat = float32(tpv.Lat)
-		currentBoat.Lon = float32(tpv.Lon)
-		message <- currentBoat
-	})
-
-	done := gps.Watch()
-	<-done
-
 }
