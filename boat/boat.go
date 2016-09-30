@@ -9,6 +9,77 @@ import (
 	"log"
 )
 
+type Boat struct {
+	Navigation Nav
+	Power      Electrical
+}
+
+func NewBoat() *Boat {
+	b := Boat{}
+	return &b
+}
+
+func (b *Boat) Marshal() *[]byte {
+	encoded, _ := json.Marshal(b)
+	return &encoded
+}
+
+type Nav struct {
+	Position         Point   `json:"position,omitempty"`
+	SpeedOverGround  float32 `json:"speedGPS,omitempty"`
+	CourseOverGround float32 `json:"courseGPS,omitempty"`
+	HeadingMagnetic  float32 `json:"heading,omitempty"`
+	Log              float32 `json:"log,omitempty"`
+	Depth            float32 `json:"depth",omitempty`
+	MainSail         int32   `json:"mainsail",omitempty`
+	Jib              int32   `json:"jib",omitempty`
+	Rudder           int32   `json:"rudder",omitempty`
+	Pitch            float32 `json:"pitch,omitempty"`
+	Roll             float32 `json:"roll,omitempty"`
+	ROT              float32 `json:"rot,omitempty"`
+}
+
+type Point [2]float64
+
+type Electrical struct {
+	Volts       float32 `json:"volts",omitempty`
+	Amperes     float32 `json:"amperes,omitempty"`
+	JoulesTotal float32 `json:"joules_total,omitempty"`
+}
+
+func (n *Nav) Marshal() *[]byte {
+	encoded, _ := json.Marshal(n)
+	return &encoded
+}
+func NewNav() *Nav {
+	n := Nav{}
+	return &n
+}
+
+type Waypoint struct {
+	Coordinate Point
+}
+
+type Muxable interface {
+	Marshal() *[]byte
+}
+
+func checkGracefull(err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func check(err error) {
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+//-------------------------------
+// Ingest json from serial port
+//-------------------------------
+
 func Ingest(s string, message chan Muxable) {
 
 	config := &serial.Config{
@@ -16,9 +87,7 @@ func Ingest(s string, message chan Muxable) {
 		Baud: 115200,
 	}
 	arduino, err := serial.OpenPort(config)
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 	defer arduino.Close()
 
 	reader := bufio.NewReader(arduino)
@@ -26,16 +95,20 @@ func Ingest(s string, message chan Muxable) {
 
 	for {
 		token, _, err = reader.ReadLine()
-		if err != nil {
-			panic(err)
-		}
-		currentBoat := NewBoat()
+		check(err)
+		currentBoat := NewNav()
 		err = json.Unmarshal(token, currentBoat)
+		checkGracefull(err)
 		if err == nil {
 			message <- currentBoat
 		}
+
 	}
 }
+
+//--------------------------------------------
+// Ingest data from gpsd running on local host
+//--------------------------------------------
 
 func IngestGPSD(message chan Muxable) {
 
@@ -49,47 +122,15 @@ func IngestGPSD(message chan Muxable) {
 	gps.AddFilter("TPV", func(r interface{}) {
 		tpv := r.(*gpsd.TPVReport)
 		currentBoat := NewBoat()
-		currentBoat.Lat = float32(tpv.Lat)
-		currentBoat.Lon = float32(tpv.Lon)
+		currentBoat.Navigation.Position[0] = tpv.Lat
+		currentBoat.Navigation.Position[1] = tpv.Lon
+		currentBoat.Navigation.SpeedOverGround = float32(tpv.Speed)
+		currentBoat.Navigation.CourseOverGround = float32(tpv.Track)
+
 		message <- currentBoat
 	})
 
 	done := gps.Watch()
 	<-done
 
-}
-
-type Boat struct {
-	Id          int32   `json:"id",omitempty`
-	Rudder      int32   `json:"rudder",omitempty`
-	Depth       float32 `json:"depth",omitempty`
-	MainSail    int32   `json:"mainsail",omitempty`
-	Jib         int32   `json:"jib",omitempty`
-	Volts       float32 `json:"volts",omitempty`
-	Amperes     float32 `json:"amperes,omitempty"`
-	JoulesTotal float32 `json:"joules_total,omitempty"`
-	joulesTrip  float32 `json:"joules_trip,omitempty"`
-	Heading     float32 `json:"heading,omitempty"`
-	Pitch       float32 `json:"pitch,omitempty"`
-	Roll        float32 `json:"roll,omitempty"`
-	Lat         float32 `json:"lat,omitempty"`
-	Lon         float32 `json:"lon,omitempty"`
-	Q0          float32 `json:"q0"`
-	Q1          float32 `json:"q1"`
-	Q2          float32 `json:"q2"`
-	Q3          float32 `json:"q3"`
-}
-
-func (b *Boat) Marshal() *[]byte {
-	encoded, _ := json.Marshal(b)
-	return &encoded
-}
-
-func NewBoat() *Boat {
-	b := Boat{}
-	return &b
-}
-
-type Muxable interface {
-	Marshal() *[]byte
 }

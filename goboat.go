@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/denautonomepirat/goboat/boat"
@@ -48,7 +50,8 @@ func main() {
 				log.Println("read:", err)
 				return
 			}
-			log.Printf("recv: %s", message)
+			_ = message
+			//log.Printf("recv: %s", message)
 		}
 	}()
 
@@ -60,6 +63,9 @@ func main() {
 
 		case muxable = <-ingestChannel:
 			msg = muxable.Marshal()
+			printable := new(bytes.Buffer)
+			json.Indent(printable, *msg, "", "    ")
+			fmt.Println(printable)
 			err := c.WriteMessage(websocket.TextMessage, *msg)
 			if err != nil {
 				log.Println("write:", err)
