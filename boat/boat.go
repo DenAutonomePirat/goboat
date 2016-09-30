@@ -30,35 +30,48 @@ type Nav struct {
 	CourseOverGround float32 `json:"courseGPS,omitempty"`
 	HeadingMagnetic  float32 `json:"heading,omitempty"`
 	Log              float32 `json:"log,omitempty"`
-	Depth            float32 `json:"depth",omitempty`
-	MainSail         int32   `json:"mainsail",omitempty`
-	Jib              int32   `json:"jib",omitempty`
-	Rudder           int32   `json:"rudder",omitempty`
+	Depth            float32 `json:"depth,omitempty"`
+	MainSail         int32   `json:"mainsail,omitempty"`
+	Jib              int32   `json:"jib,omitempty"`
+	Rudder           int32   `json:"rudder,omitempty"`
 	Pitch            float32 `json:"pitch,omitempty"`
 	Roll             float32 `json:"roll,omitempty"`
-	ROT              float32 `json:"rot,omitempty"`
+	Rotation         float32 `json:"rot,omitempty"`
 }
 
 type Point [2]float64
 
 type Electrical struct {
-	Volts       float32 `json:"volts",omitempty`
+	Volts       float32 `json:"volts,omitempty"`
 	Amperes     float32 `json:"amperes,omitempty"`
 	JoulesTotal float32 `json:"joules_total,omitempty"`
+}
+
+func NewNav() *Nav {
+	n := Nav{}
+	return &n
 }
 
 func (n *Nav) Marshal() *[]byte {
 	encoded, _ := json.Marshal(n)
 	return &encoded
 }
-func NewNav() *Nav {
-	n := Nav{}
-	return &n
-}
 
 type Waypoint struct {
+	Name       string
+	Type       WaypointType
 	Coordinate Point
 }
+
+type WaypointType int
+
+const (
+	NorthCardinalBuoy WaypointType = iota
+	SouthCardinalBuoy
+	EastCardinalBuoy
+	WestCardinalBuoy
+	FairwayBuoy
+)
 
 type Muxable interface {
 	Marshal() *[]byte
