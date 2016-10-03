@@ -10,8 +10,8 @@ import (
 )
 
 type Boat struct {
-	Navigation Nav
-	Power      Electrical
+	Navigation Nav        `json:"navigation,omitempty"`
+	Power      Electrical `json:"power,omitempty"`
 }
 
 func NewBoat() *Boat {
@@ -59,31 +59,26 @@ func (n *Nav) Marshal() *[]byte {
 
 type Waypoint struct {
 	Name       string
-	Type       WaypointType
+	Type       string
 	Coordinate Point
 }
 
-type WaypointType int
-
-const (
-	NorthCardinalBuoy WaypointType = iota
-	SouthCardinalBuoy
-	EastCardinalBuoy
-	WestCardinalBuoy
-	FairwayBuoy
-)
+func (w *Waypoint) Marshal() *[]byte {
+	encoded, _ := json.Marshal(w)
+	return &encoded
+}
 
 type Muxable interface {
 	Marshal() *[]byte
 }
 
-func checkGracefull(err error) {
+func CheckGracefull(err error) {
 	if err != nil {
 		fmt.Println(err)
 	}
 }
 
-func check(err error) {
+func Check(err error) {
 	if err != nil {
 		log.Panic(err)
 	}
@@ -93,14 +88,14 @@ func check(err error) {
 // Ingest json from serial port
 //-------------------------------
 
-func Ingest(s string, message chan Muxable) {
+func Ingest(s string, message chan *Boat) {
 
 	config := &serial.Config{
 		Name: s,
 		Baud: 115200,
 	}
 	arduino, err := serial.OpenPort(config)
-	check(err)
+	Check(err)
 	defer arduino.Close()
 
 	reader := bufio.NewReader(arduino)
@@ -108,10 +103,10 @@ func Ingest(s string, message chan Muxable) {
 
 	for {
 		token, _, err = reader.ReadLine()
-		check(err)
-		currentBoat := NewNav()
+		Check(err)
+		currentBoat := NewBoat()
 		err = json.Unmarshal(token, currentBoat)
-		checkGracefull(err)
+		CheckGracefull(err)
 		if err == nil {
 			message <- currentBoat
 		}
@@ -123,7 +118,7 @@ func Ingest(s string, message chan Muxable) {
 // Ingest data from gpsd running on local host
 //--------------------------------------------
 
-func IngestGPSD(message chan Muxable) {
+func IngestGPSD(message chan *Boat) {
 
 	var gps *gpsd.Session
 	var err error
