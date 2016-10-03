@@ -24,6 +24,7 @@ func Listen() {
 
 			msg := <-web.mux.Recieve
 			json.Unmarshal(msg, &b)
+			fmt.Printf("%s\n", b.Marshal())
 			web.mux.Broadcast <- b
 		}
 	}()

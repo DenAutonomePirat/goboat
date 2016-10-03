@@ -30,7 +30,7 @@ func Connect(dataChannel chan Muxable, interrupt chan os.Signal, addr *string) {
 				return
 			}
 			_ = message
-			//log.Printf("recv: %s", message)
+			log.Printf("recv: %s", message)
 		}
 	}()
 
