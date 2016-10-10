@@ -24,7 +24,7 @@ func (w *Web) ListenAndServe() {
 	r.Static("/images", "./server/assets/images")
 
 	r.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/server/assets/index.html")
+		c.Redirect(http.StatusMovedPermanently, "/assets/index.html")
 	})
 
 	r.GET("/ws", func(c *gin.Context) {

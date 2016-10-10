@@ -319,10 +319,10 @@ function animate() {
 function render() {
 	var xAxis = new THREE.Vector3(0,1,0);
 	rotateAroundWorldAxis(mesh, xAxis, targetRotation);
-	var yAxis = new THREE.Vector3(1,0,0);
-	rotateAroundObjectAxis(mesh, yAxis, targetRoll);
-	var zAxis = new THREE.Vector3(0,0,1);
-	rotateAroundWorldAxis(mesh, zAxis, targetPitch);
+	//var yAxis = new THREE.Vector3(1,0,0);
+	//rotateAroundObjectAxis(mesh, yAxis, targetRoll);
+	//var zAxis = new THREE.Vector3(0,0,1);
+	//rotateAroundWorldAxis(mesh, zAxis, targetPitch);
 	//plane.rotation.y = cube.rotation.y += ( targetRotation - cube.rotation.y ) * 0.05;
 	renderer.render( scene, camera );
 

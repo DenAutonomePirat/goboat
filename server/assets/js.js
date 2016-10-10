@@ -36,11 +36,10 @@ Skipper.prototype.getWsUrl = function() {
 };
 
 Skipper.prototype.onMessage = function(msg) {
-	// we should figure out what type of message this is ... its going to be ugly
 	var msg = JSON.parse(msg.data);
-	targetRotation = msg.heading*-0.0174532925;
-	targetRoll = msg.roll*-0.0174532925;
-	targetPitch = msg.pitch*-0.0174532925;
-	targetLat = msg.lat;
-	targetLon = msg.lon;
+	targetRotation = msg.navigation.heading*-0.0174532925;
+	targetRoll = msg.navigation.roll*-0.0174532925;
+	targetPitch = msg.navigation.pitch*-0.0174532925;
+	targetLat = msg.navigation.lat;
+	targetLon = msg.navigation.lon;
 };
