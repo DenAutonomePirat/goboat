@@ -22,12 +22,4 @@ func main() {
 	User.SetWaypoint(2, w)
 	fmt.Printf("%s\n", *User.Marshal())
 
-	userbyte := *User.Marshal()
-	var c map[string]interface{}
-	json.Unmarshal(userbyte, &c)
-
-	if c["class"] == "User" {
-		fmt.Println("true")
-	}
-
 }

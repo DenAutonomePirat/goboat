@@ -2,20 +2,10 @@ var container, stats;
 var camera, scene, renderer;
 
 var cube, plane, mesh;
+var group;
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
-var parameters = {
-				width: 2000,
-				height: 2000,
-				widthSegments: 250,
-				heightSegments: 250,
-				depth: 1500,
-				param: 4,
-				filterparam: 1
-			}
-			
-			var waterNormals;
 
 
 
@@ -31,52 +21,34 @@ function init() {
 	container = document.getElementById("modelSTL");
 
 
-	camera = new THREE.PerspectiveCamera( 45, container.offsetWidth / container.offsetHeight, 1, 3000 );
+	camera = new THREE.PerspectiveCamera( 20, container.offsetWidth / container.offsetHeight, 1, 6000 );
 
-	camera.position.y = 500;
-	camera.position.z = 1000;
-	camera.rotation.x = -0.4;
+	camera.position.y = 200;
+	camera.position.z = 4000;
+	camera.rotation.x = 0;
 
 	scene = new THREE.Scene();
 
-	//// Cube
-
-	// var geometry = new THREE.BoxGeometry( 200, 200, 200 );
-
-	// for ( var i = 0; i < geometry.faces.length; i += 2 ) {
-
-	// 	var hex = Math.random() * 0xffffff;
-	// 	geometry.faces[ i ].color.setHex( hex );
-	// 	geometry.faces[ i + 1 ].color.setHex( hex );
-
-	// }
-
-	// var material = new THREE.MeshBasicMaterial( { vertexColors: THREE.FaceColors, overdraw: 0.5 } );
-
-	// cube = new THREE.Mesh( geometry, material );
-	// cube.position.y = 150;
-	// scene.add( cube );
-
 	// STL
-
+	
+	group = new THREE.Object3D();
 	var loader = new THREE.STLLoader();
-	var material = new THREE.MeshPhongMaterial( { ambient: 0xff5533, color: 0xff5533, specular: 0x111111, shininess: 200 } );
 	loader.load( "/images/model.stl", function ( geometry ) {
-		var meshMaterial = material;
+		var meshMaterial = new THREE.MeshPhongMaterial( { ambient: 0xff5533, color: 0xff5533, specular: 0x111111, shininess: 200 } );
 		if (geometry.hasColors) {
 			meshMaterial = new THREE.MeshPhongMaterial({ opacity: geometry.alpha, vertexColors: THREE.VertexColors });
 		}
 
-		mesh = new THREE.Mesh( geometry, meshMaterial );
+		group = new THREE.Mesh( geometry, meshMaterial );
 
-		mesh.position.set( 0, 0, -700 );
+		group.position.set( 0, -200, 0 );
 		
 		//mesh.rotation.set( - Math.PI / 2, Math.PI / 2, 0 );
-		mesh.scale.set( 1, 1, 1);
-		mesh.castShadow = true;
-		mesh.receiveShadow = true;
+		group.scale.set( 1, 1, 1);
+		group.castShadow = true;
+		group.receiveShadow = true;
 
-		scene.add( mesh );
+		scene.add( group );
 
 	} );
 
@@ -95,11 +67,6 @@ function init() {
 	renderer.shadowMapCullFace = THREE.CullFaceBack;
 
 	container.appendChild( renderer.domElement );
-
-	// stats = new Stats();
-	// stats.domElement.style.position = 'absolute';
-	// stats.domElement.style.top = '312px';
-	// container.appendChild( stats.domElement );
 
 	document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 	document.addEventListener( 'touchstart', onDocumentTouchStart, false );
@@ -220,15 +187,15 @@ function animate() {
 }
 
 function render() {
-	var xAxis = new THREE.Vector3(0,1,0);
-	rotateAroundWorldAxis(mesh, xAxis, currentRotation);
-	//var yAxis = new THREE.Vector3(1,0,0);
-	//rotateAroundObjectAxis(mesh, yAxis, currentRoll);
-	//var zAxis = new THREE.Vector3(0,0,1);
-	//rotateAroundWorldAxis(mesh, zAxis, currentPitch);
-	//plane.rotation.y = cube.rotation.y += ( currentRotation - cube.rotation.y ) * 0.05;
-	renderer.render( scene, camera );
+	//var xAxis = new THREE.Vector3(0,1,0);
+	//rotateAroundObjectAxis(group, xAxis, currentRotation);
+	var yAxis = new THREE.Vector3(0,0,-1);
+	rotateAroundWorldAxis(group, yAxis, currentRoll);
+	//var zAxis = new THREE.Vector3(1,0,0);
+	//rotateAroundWorldAxis(group, zAxis, currentPitch);
 
+
+	renderer.render( scene, camera );
 }
 
 var rotObjectMatrix;
