@@ -1,9 +1,8 @@
 package server
 
 import (
-	"log"
-
 	"github.com/gorilla/websocket"
+	"log"
 )
 
 type Conn struct {
@@ -25,14 +24,14 @@ func (c *Conn) write() {
 	for {
 		msg, ok := <-c.Output
 
-		if !ok { //the channel is closed
+		if !ok {
 			return
 		}
 
 		err := c.socket.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
 			log.Printf("Error writing to %p: %s", c, err.Error())
-			return //is this enough ?
+			return
 		}
 	}
 }
@@ -49,7 +48,6 @@ func (c *Conn) read() {
 			log.Printf("Error reading message from %p: %s", c, err.Error())
 			break
 		}
-		//log.Printf("Message from %p: %s", c, msg)
 		c.mux.Recieve <- msg
 	}
 }

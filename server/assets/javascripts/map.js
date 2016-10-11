@@ -59,8 +59,8 @@ var map = L.map('map').setView([56.8835, 9.37134], 9)
 
 openseamap = new L.TileLayer('http://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {maxZoom: 18}).addTo(map);
 
-var self = L.icon({
-    iconUrl: 'images/self.png',
+var boatIcon = L.icon({
+    iconUrl: 'images/boat.png',
     iconSize: [18, 44],
     iconAnchor: [9, 22],
     popupAnchor: [9, 22]
@@ -96,24 +96,28 @@ var markerFinish = L.marker([56.96487, 10.36663],{
 markerFinish.addTo(map);
 
 
-var marker1 = L.marker([56.72052, 8.21297],{
-    draggable:true,
-    icon: self,
-    iconAngle: targetRotation
+var boat = L.marker([currentLat,currentLon ],{
+    draggable:false,
+    icon: boatIcon,
+    iconAngle: currentRotation
 })
-marker1.addTo(map);
 
-var marker2 = L.marker([56.71091, 8.2267],{
+
+boat.addTo(map);
+
+var firstWaypoint = L.marker([56.71091, 8.2267],{
     draggable:true,
-})
-marker2.addTo(map);
 
-var marker3 = L.marker([56.69659, 8.23975],{
+})
+firstWaypoint.addTo(map);
+
+var secondWaypoint = L.marker([56.69659, 8.23975],{
     draggable:true,
-})
-marker3.addTo(map);
 
-var pointList = [marker1.getLatLng(),marker2.getLatLng(),marker3.getLatLng(),markerFinish.getLatLng()];
+})
+secondWaypoint.addTo(map);
+
+var pointList = [boat.getLatLng(),firstWaypoint.getLatLng(),secondWaypoint.getLatLng(),markerFinish.getLatLng()];
 
 var route = new L.Polyline(pointList, {
 color: 'red',
@@ -146,8 +150,20 @@ function onMapClick(e) {
 
 map.on('click', onMapClick);
 
+function changedWaypoint() {
+    console.log("Changed waypoint");
+}
+
+
+firstWaypoint.on('dragend', changedWaypoint);
+
+
+
+
+
+
 setInterval(function () {
-    marker1.setIconAngle(targetRotation/Math.PI*180);
-    marker1.setLatLng([targetLat,targetLon]);
-    route.setLatLngs([marker1.getLatLng(),marker2.getLatLng(),marker3.getLatLng(),markerFinish.getLatLng()]);
+    boat.setIconAngle(currentRotation/Math.PI*-180);
+    boat.setLatLng([currentLat,currentLon]);
+    route.setLatLngs([boat.getLatLng(),firstWaypoint.getLatLng(),secondWaypoint.getLatLng(),markerFinish.getLatLng()]);
 }, 100);

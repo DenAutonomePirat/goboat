@@ -1,13 +1,7 @@
-
-
-
 var container, stats;
 var camera, scene, renderer;
 
 var cube, plane, mesh;
-
-var mouseX = 0;
-var mouseXOnMouseDown = 0;
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -86,99 +80,9 @@ function init() {
 
 	} );
 
-	// var light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
-	// 			light.position.set( - 1, 1, - 1 );
-	// 			scene.add( light );
-
-				
-	// 			waterNormals = new THREE.ImageUtils.loadTexture( 'images/waternormals.jpg' );
-	// 			waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; 
-
-	// 			water = new THREE.Water( renderer, camera, scene, {
-	// 				textureWidth: 512, 
-	// 				textureHeight: 512,
-	// 				waterNormals: waterNormals,
-	// 				alpha: 	1.0,
-	// 				sunDirection: light.position.clone().normalize(),
-	// 				sunColor: 0xffffff,
-	// 				waterColor: 0x001e0f,
-	// 				distortionScale: 50.0,
-	// 			} );
-
-	// 			mirrorMesh = new THREE.Mesh(
-	// 				new THREE.PlaneBufferGeometry( parameters.width * 500, parameters.height * 500 ),
-	// 				water.material
-	// 			);
-
-	// 			mirrorMesh.add( water );
-	// 			mirrorMesh.rotation.x = - Math.PI * 0.5;
-	// 			scene.add( mirrorMesh );
-	// 			// load skybox
-
-	// 			var cubeMap = new THREE.CubeTexture( [] );
-	// 			cubeMap.format = THREE.RGBFormat;
-	// 			cubeMap.flipY = false;
-
-	// 			var loader = new THREE.ImageLoader();
-	// 			loader.load( 'images/skyboxsun25degtest.png', function ( image ) {
-
-	// 				var getSide = function ( x, y ) {
-
-	// 					var size = 1024;
-
-	// 					var canvas = document.createElement( 'canvas' );
-	// 					canvas.width = size;
-	// 					canvas.height = size;
-
-	// 					var context = canvas.getContext( '2d' );
-	// 					context.drawImage( image, - x * size, - y * size );
-
-	// 					return canvas;
-
-	// 				};
-
-	// 				cubeMap.images[ 0 ] = getSide( 2, 1 ); // px
-	// 				cubeMap.images[ 1 ] = getSide( 0, 1 ); // nx
-	// 				cubeMap.images[ 2 ] = getSide( 1, 0 ); // py
-	// 				cubeMap.images[ 3 ] = getSide( 1, 2 ); // ny
-	// 				cubeMap.images[ 4 ] = getSide( 1, 1 ); // pz
-	// 				cubeMap.images[ 5 ] = getSide( 3, 1 ); // nz
-	// 				cubeMap.needsUpdate = true;
-
-	// 			} );
-
-	// 			var cubeShader = THREE.ShaderLib['cube'];
-	// 			cubeShader.uniforms['tCube'].value = cubeMap;
-
-	// 			var skyBoxMaterial = new THREE.ShaderMaterial( {
-	// 				fragmentShader: cubeShader.fragmentShader,
-	// 				vertexShader: cubeShader.vertexShader,
-	// 				uniforms: cubeShader.uniforms,
-	// 				depthWrite: false,
-	// 				side: THREE.BackSide
-	// 			});
-
-	// 			var skyBox = new THREE.Mesh(
-	// 				new THREE.BoxGeometry( 1000000, 1000000, 1000000 ),
-	// 				skyBoxMaterial
-	// 			);
-				
-	// 			scene.add( skyBox );
 	scene.add( new THREE.AmbientLight( 0x777777 ) );
 
-	// addShadowedLight( 1, 1, 1, 0xffffff, 1.35 );
-	// addShadowedLight( 0.5, 1, -1, 0xffaa00, 1 );
-
-	// Plane
-
-	// var geometry = new THREE.PlaneBufferGeometry( 2000, 2000 );
-	// geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
-
-	// var material = new THREE.MeshBasicMaterial( { color: 0x3B96FF, opacity: 0.2} );
-
-	// plane = new THREE.Mesh( geometry, material );
-	// scene.add( plane );
-
+	 
 	renderer = new THREE.WebGLRenderer({ alpha: true } );
 	renderer.setClearColor( 0x000000,0 );
 	renderer.setPixelRatio( window.devicePixelRatio );
@@ -312,18 +216,17 @@ function animate() {
 	requestAnimationFrame( animate );
 
 	render();
-	//stats.update(	);
 
 }
 
 function render() {
 	var xAxis = new THREE.Vector3(0,1,0);
-	rotateAroundWorldAxis(mesh, xAxis, targetRotation);
+	rotateAroundWorldAxis(mesh, xAxis, currentRotation);
 	//var yAxis = new THREE.Vector3(1,0,0);
-	//rotateAroundObjectAxis(mesh, yAxis, targetRoll);
+	//rotateAroundObjectAxis(mesh, yAxis, currentRoll);
 	//var zAxis = new THREE.Vector3(0,0,1);
-	//rotateAroundWorldAxis(mesh, zAxis, targetPitch);
-	//plane.rotation.y = cube.rotation.y += ( targetRotation - cube.rotation.y ) * 0.05;
+	//rotateAroundWorldAxis(mesh, zAxis, currentPitch);
+	//plane.rotation.y = cube.rotation.y += ( currentRotation - cube.rotation.y ) * 0.05;
 	renderer.render( scene, camera );
 
 }
@@ -366,4 +269,3 @@ function rotateAroundWorldAxis(object, axis, radians) {
     // code for r59+:
     object.rotation.setFromRotationMatrix(object.matrix);
 }
-

@@ -17,15 +17,30 @@ func Listen() {
 
 	//users := NewStore()
 	//defer users.db.Close()
+
+	counter := 0
+
 	go func() {
-		b := boat.NewBoat()
 
 		for {
 
 			msg := <-web.mux.Recieve
-			json.Unmarshal(msg, &b)
-			fmt.Printf("%s\n", b.Marshal())
-			web.mux.Broadcast <- b
+			var c map[string]interface{}
+			json.Unmarshal(msg, &c)
+
+			if c["class"] == "User" {
+				u := NewUser()
+				json.Unmarshal(msg, &u)
+				fmt.Println("User Data recieved")
+			}
+			if c["class"] == "Boat" {
+				b := boat.NewBoat()
+				counter++
+				fmt.Printf("%d messages recieved\r", counter)
+				json.Unmarshal(msg, &b)
+				web.mux.Broadcast <- b
+			}
+
 		}
 	}()
 	web.ListenAndServe()

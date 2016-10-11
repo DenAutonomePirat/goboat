@@ -1,21 +1,33 @@
 package boat
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/stratoberry/go-gpsd"
-	"github.com/tarm/serial"
 	"log"
 )
 
+func CheckGracefull(err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func Check(err error) {
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
 type Boat struct {
+	Class      string     `json:"class"`
 	Navigation Nav        `json:"navigation,omitempty"`
 	Power      Electrical `json:"power,omitempty"`
+	Routes     []Route
 }
 
 func NewBoat() *Boat {
 	b := Boat{}
+	b.Class = "Boat"
 	return &b
 }
 
@@ -46,6 +58,9 @@ type Electrical struct {
 	Amperes     float32 `json:"amperes,omitempty"`
 	JoulesTotal float32 `json:"joules_total,omitempty"`
 }
+type Route struct {
+	Waypoints []Waypoint `json:"waypoints"`
+}
 
 func NewNav() *Nav {
 	n := Nav{}
@@ -58,9 +73,15 @@ func (n *Nav) Marshal() *[]byte {
 }
 
 type Waypoint struct {
-	Name       string
-	Type       string
-	Coordinate Point
+	Name       string `json:"name,omitempty"`
+	Type       int    `json:"type,omitempty"`
+	Coordinate Point  `json:"coordinate,omitempty"`
+	Message    string `json:"message,omitempty"`
+}
+
+func NewWaypoint() *Waypoint {
+	w := Waypoint{}
+	return &w
 }
 
 func (w *Waypoint) Marshal() *[]byte {
@@ -70,75 +91,4 @@ func (w *Waypoint) Marshal() *[]byte {
 
 type Muxable interface {
 	Marshal() *[]byte
-}
-
-func CheckGracefull(err error) {
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
-func Check(err error) {
-	if err != nil {
-		log.Panic(err)
-	}
-}
-
-//-------------------------------
-// Ingest json from serial port
-//-------------------------------
-
-func Ingest(s string, message chan *Boat) {
-
-	config := &serial.Config{
-		Name: s,
-		Baud: 115200,
-	}
-	arduino, err := serial.OpenPort(config)
-	Check(err)
-	defer arduino.Close()
-
-	reader := bufio.NewReader(arduino)
-	var token []byte
-
-	for {
-		token, _, err = reader.ReadLine()
-		Check(err)
-		currentBoat := NewBoat()
-		err = json.Unmarshal(token, currentBoat)
-		CheckGracefull(err)
-		if err == nil {
-			message <- currentBoat
-		}
-
-	}
-}
-
-//--------------------------------------------
-// Ingest data from gpsd running on local host
-//--------------------------------------------
-
-func IngestGPSD(message chan *Boat) {
-
-	var gps *gpsd.Session
-	var err error
-
-	if gps, err = gpsd.Dial(gpsd.DefaultAddress); err != nil {
-		panic(fmt.Sprintf("Failed to connect to GPSD: ", err))
-	}
-
-	gps.AddFilter("TPV", func(r interface{}) {
-		tpv := r.(*gpsd.TPVReport)
-		currentBoat := NewBoat()
-		currentBoat.Navigation.Position[0] = tpv.Lat
-		currentBoat.Navigation.Position[1] = tpv.Lon
-		currentBoat.Navigation.SpeedOverGround = float32(tpv.Speed)
-		currentBoat.Navigation.CourseOverGround = float32(tpv.Track)
-
-		message <- currentBoat
-	})
-
-	done := gps.Watch()
-	<-done
-
 }
