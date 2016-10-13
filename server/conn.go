@@ -6,6 +6,7 @@ import (
 )
 
 type Conn struct {
+	Uses   User
 	Output chan []byte
 	socket *websocket.Conn
 	mux    *Mux

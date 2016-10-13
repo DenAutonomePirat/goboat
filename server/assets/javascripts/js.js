@@ -1,5 +1,5 @@
 $(function() {
-	var skipper = new Skipper();
+	skipper = new Skipper();
 });
 
 console.log("Setting default positions")
@@ -11,17 +11,17 @@ var Skipper = function() {
 	console.log("Connecting..");
 
 	if (window["WebSocket"]) {
-		var conn = new WebSocket(this.getWsUrl());
+		var conn = new ReconnectingWebSocket(this.getWsUrl());
 
 		conn.onclose = function(evt) {
-			alert("I has no connection");
+			console.log("Lost connection to server")
 		};
 
 		conn.onmessage = this.onMessage.bind(this)
-
+	
 		this.conn = conn
 	}
-	// What to do?
+
 };
 
 Skipper.prototype.getWsUrl = function() {
@@ -48,5 +48,14 @@ Skipper.prototype.onMessage = function(msg) {
 			currentLat = msg.navigation.lat;
 			currentLon = msg.navigation.lon;
 		}
+		return
 	}
+	console.log("unknown message");
 };
+
+window.Skipper.prototype.send = function(msg) {
+	console.log(msg);
+	if (this.conn.readyState){
+		this.conn.send(msg);
+	}
+}

@@ -8,7 +8,7 @@ html, body
 }
 
 #mapdiv {
-	margin-right: 308px;
+	//margin-right: 308px;
 	height:100%;
 }
 #map {

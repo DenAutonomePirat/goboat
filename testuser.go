@@ -21,5 +21,4 @@ func main() {
 	w.Name = "lkj 34"
 	User.SetWaypoint(2, w)
 	fmt.Printf("%s\n", *User.Marshal())
-
 }

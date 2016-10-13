@@ -40,15 +40,18 @@
                 }
                 if (this._shadow) {
                     if (this.options.icon.options.shadowAnchor)
-                        a = this.options.icon.options.shadowAnchor;
+                    a = this.options.icon.options.shadowAnchor;
                     s = this.options.icon.options.shadowSize;
                     i = this._shadow;
                     this._updateImg(i, a, s);
                 }
             }
-        }
+        },
     });
 }());
+
+
+
 
 
 var map = L.map('map').setView([56.8835, 9.37134], 9)
@@ -150,14 +153,11 @@ function onMapClick(e) {
 
 map.on('click', onMapClick);
 
-function changedWaypoint() {
-    console.log("Changed waypoint");
-    //send something to test conn.send("{\"class\":\"User\",\"id\":0,\"name\":\"Thomas\",\"online\":false,\"connected_at\":\"0001-01-01T00:00:00Z\",\"onlineDuration\":0,\"waypoints\":[{\"name\":\"waypoint 1\",\"coordinate\":[0,0]},{\"name\":\"waypoint 2\",\"coordinate\":[0,0]},{\"name\":\"lkj 34\",\"coordinate\":[12.54,65.45]}]}");
-}
 
 
-firstWaypoint.on('dragend', changedWaypoint);
-
+L.Marker.prototype.on('dragend', function(e) {
+    skipper.send("");
+});
 
 
 

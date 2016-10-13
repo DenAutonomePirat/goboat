@@ -187,10 +187,10 @@ function animate() {
 }
 
 function render() {
-	//var xAxis = new THREE.Vector3(0,1,0);
-	//rotateAroundObjectAxis(group, xAxis, currentRotation);
-	var yAxis = new THREE.Vector3(0,0,-1);
-	rotateAroundWorldAxis(group, yAxis, currentRoll);
+	var xAxis = new THREE.Vector3(0,1,0);
+	rotateAroundObjectAxis(group, xAxis, currentRotation);
+	//var yAxis = new THREE.Vector3(0,0,-1);
+	//rotateAroundWorldAxis(group, yAxis, currentRoll);
 	//var zAxis = new THREE.Vector3(1,0,0);
 	//rotateAroundWorldAxis(group, zAxis, currentPitch);
 

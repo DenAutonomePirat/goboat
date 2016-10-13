@@ -31,7 +31,7 @@ func Listen() {
 			if c["class"] == "User" {
 				u := NewUser()
 				json.Unmarshal(msg, &u)
-				fmt.Println("User Data recieved")
+				fmt.Printf("User %d send data\n", u.Id)
 			}
 			if c["class"] == "Boat" {
 				b := boat.NewBoat()
