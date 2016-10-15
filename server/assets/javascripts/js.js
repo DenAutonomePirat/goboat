@@ -56,6 +56,11 @@ Skipper.prototype.getWsUrl = function() {
 Skipper.prototype.onMessage = function(msg) {
 	var msg = JSON.parse(msg.data);
 	if (msg.class == "Boat"){
+		if (msg.navigation.position[0] != null){
+		currentLat = msg.navigation.position[0];
+		currentLon = msg.navigation.position[1];
+			
+		}
 		currentRotation = msg.navigation.heading*-0.0174532925;
 		currentRoll = msg.navigation.roll*0.0174532925;
 		currentPitch = msg.navigation.pitch*-0.0174532925;
