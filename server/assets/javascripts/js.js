@@ -1,14 +1,24 @@
 $(function() {
+	console.log("Setting default positions")
+	currentLat = 56.72052; 
+	currentLon = 8.21297;
+	currentRotation = 90;
+	currentRoll = 0;
+	currentPitch = 0;
+
+	
 	skipper = new Skipper();
 });
 
-console.log("Setting default positions")
-var currentLat =56.72052; 
-var currentLon = 8.21297;
-var currentRotation = 0;
-
 var Skipper = function() {
-	console.log("Connecting..");
+
+	
+	console.log("Downloading game setup");
+	var gameSettings = JSON.parse(httpGet(location.origin + "/api/gamesetup"));
+	console.log(gameSettings);
+	var map = new Map();
+	map.initGame(gameSettings);
+
 
 	if (window["WebSocket"]) {
 		var conn = new ReconnectingWebSocket(this.getWsUrl());
@@ -21,6 +31,11 @@ var Skipper = function() {
 	
 		this.conn = conn
 	}
+
+    setInterval(function () {
+    	map.updateGame();
+    	//model.update();
+    }, 100);
 
 };
 
@@ -42,20 +57,26 @@ Skipper.prototype.onMessage = function(msg) {
 	var msg = JSON.parse(msg.data);
 	if (msg.class == "Boat"){
 		currentRotation = msg.navigation.heading*-0.0174532925;
-		currentRoll = msg.navigation.roll*-0.0174532925;
+		currentRoll = msg.navigation.roll*0.0174532925;
 		currentPitch = msg.navigation.pitch*-0.0174532925;
-		if (msg.navigation.lat != null){
-			currentLat = msg.navigation.lat;
-			currentLon = msg.navigation.lon;
-		}
+		
+
 		return
 	}
 	console.log("unknown message");
 };
 
-window.Skipper.prototype.send = function(msg) {
+Skipper.prototype.send = function(msg) {
 	console.log(msg);
 	if (this.conn.readyState){
 		this.conn.send(msg);
 	}
+}
+
+function httpGet(theUrl)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
 }

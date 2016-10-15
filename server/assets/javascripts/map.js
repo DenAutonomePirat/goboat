@@ -50,121 +50,110 @@
     });
 }());
 
+function Map(){
 
-
-
-
-var map = L.map('map').setView([56.8835, 9.37134], 9)
+    this.map = L.map('map').setView([56.8835, 9.37134], 9)
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-    maxZoom: 18
-    }).addTo(map);
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+        maxZoom: 18
+    }).addTo(this.map);
 
-openseamap = new L.TileLayer('http://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {maxZoom: 18}).addTo(map);
-
-var boatIcon = L.icon({
-    iconUrl: 'images/boat.png',
-    iconSize: [18, 44],
-    iconAnchor: [9, 22],
-    popupAnchor: [9, 22]
-});
-var start = L.icon({
-    iconUrl: 'images/start.png',
-    iconSize: [127,127 ],
-    iconAnchor: [64, 127],
-    popupAnchor: [64, 30]
-});
-
-var finish = L.icon({
-    iconUrl: 'images/finish.png',
-    iconSize: [127,127 ],
-    iconAnchor: [64, 127],
-    popupAnchor: [64, 30]
-});
+    L.tileLayer('http://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+        maxZoom: 18
+    }).addTo(this.map);
 
 
-
-var markerStart = L.marker([56.72161, 8.21222],{
-    title: 'Start',
-    icon: start,
-    opacity: 0.5
-})
-markerStart.addTo(map);
-
-var markerFinish = L.marker([56.96487, 10.36663],{
-    title: 'Finish',
-    icon: finish,
-    opacity: 0.5
-})
-markerFinish.addTo(map);
-
-
-var boat = L.marker([currentLat,currentLon ],{
-    draggable:false,
-    icon: boatIcon,
-    iconAngle: currentRotation
-})
-
-
-boat.addTo(map);
-
-var firstWaypoint = L.marker([56.71091, 8.2267],{
-    draggable:true,
-
-})
-firstWaypoint.addTo(map);
-
-var secondWaypoint = L.marker([56.69659, 8.23975],{
-    draggable:true,
-
-})
-secondWaypoint.addTo(map);
-
-var pointList = [boat.getLatLng(),firstWaypoint.getLatLng(),secondWaypoint.getLatLng(),markerFinish.getLatLng()];
-
-var route = new L.Polyline(pointList, {
-color: 'red',
-weight: 3,
-opacity: 0.5,
-smoothFactor: 0
-
-});
-route.addTo(map);
-
-
-
-
-
-
-map.on('moveend', function(e) {
-   var bounds = map.getBounds();
-});
-
-
-
-var popup = L.popup();
-
-function onMapClick(e) {
-    popup
-        .setLatLng(e.latlng)
-        .setContent(e.latlng.toString())
-        .openOn(map);
+    return this.map;
 }
 
-map.on('click', onMapClick);
+
+L.Map.prototype.updateGame = function(){
+    this.route.setLatLngs([this.boat.getLatLng(),this.firstWaypoint.getLatLng(),this.secondWaypoint.getLatLng(),this.markerFinish.getLatLng()]);
+    this.boat.setIconAngle(currentRotation/Math.PI*-180);
+    this.boat.setLatLng([currentLat,currentLon]);
+
+    
+};
 
 
+L.Map.prototype.initGame = function(data){
+
+
+    this.boatIcon = L.icon({
+        iconUrl: 'images/boat.png',
+        iconSize: [18, 44],
+        iconAnchor: [9, 22],
+        popupAnchor: [9, 22]
+    });
+    this.start = L.icon({
+        iconUrl: 'images/start.png',
+        iconSize: [127,127 ],
+        iconAnchor: [64, 127],
+        popupAnchor: [64, 30]
+    });
+
+    this.finish = L.icon({
+        iconUrl: 'images/finish.png',
+        iconSize: [127,127 ],
+        iconAnchor: [64, 127],
+        popupAnchor: [64, 30]
+    });
+
+    this.markerStart = L.marker([data.start.coordinate[0], 8.21222],{
+        title: 'Start',
+        icon: this.start,
+        opacity: 0.5
+    });
+    this.markerStart.addTo(this);
+
+    this.markerFinish = L.marker([56.96487, 10.36663],{
+        title: 'Finish',
+        icon: this.finish,
+        opacity: 0.5
+    });
+    this.markerFinish.addTo(this);
+
+
+    this.boat = L.marker([currentLat,currentLon],{
+        draggable:false,
+        icon: this.boatIcon,
+        iconAngle: currentRotation
+    });
+
+    this.boat.addTo(this);
+
+    this.firstWaypoint = L.marker([56.71091, 8.2267],{
+        draggable:true,
+        title:"first"
+    });
+
+    this.firstWaypoint.addTo(this);
+
+    this.secondWaypoint = L.marker([56.69659, 8.23975],{
+        draggable:true,
+        title:"second"
+
+    });
+    this.secondWaypoint.addTo(this);
+
+    this.pointList = [this.boat.getLatLng(),this.firstWaypoint.getLatLng(),this.secondWaypoint.getLatLng(),this.markerFinish.getLatLng()];
+
+    this.route = new L.Polyline(this.pointList, {
+        color: 'red',
+        weight: 3,
+        opacity: 0.5,
+        smoothFactor: 0
+
+    });
+    this.route.addTo(this);
+
+};
 
 L.Marker.prototype.on('dragend', function(e) {
-    skipper.send("");
+    skipper.send("{\"class\":\"User\"}");
+    console.log(e.target.options.title);
 });
 
-
-
-
-
-setInterval(function () {
-    boat.setIconAngle(currentRotation/Math.PI*-180);
-    boat.setLatLng([currentLat,currentLon]);
-    route.setLatLngs([boat.getLatLng(),firstWaypoint.getLatLng(),secondWaypoint.getLatLng(),markerFinish.getLatLng()]);
-}, 100);
+//L.Marker.prototype.on('move', function(){
+    //skipper.map.updateGame();
+//});

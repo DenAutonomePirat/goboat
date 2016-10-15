@@ -4,7 +4,7 @@ p {
 
 html, body
 {
-    height: 90%;
+    height: 100%;
 }
 
 #mapdiv {
@@ -46,4 +46,9 @@ html, body
 	position:absolute;
 	top:0;
 	right:0;
+}
+#login {
+	height: 200px;
+	width: 400px;
+	float: center;
 }

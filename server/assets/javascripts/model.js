@@ -67,13 +67,6 @@ function init() {
 	renderer.shadowMapCullFace = THREE.CullFaceBack;
 
 	container.appendChild( renderer.domElement );
-
-	document.addEventListener( 'mousedown', onDocumentMouseDown, false );
-	document.addEventListener( 'touchstart', onDocumentTouchStart, false );
-	document.addEventListener( 'touchmove', onDocumentTouchMove, false );
-
-	//
-
 	window.addEventListener( 'resize', onWindowResize, false );
 
 }
@@ -115,69 +108,6 @@ function onWindowResize() {
 
 }
 
-//
-
-function onDocumentMouseDown( event ) {
-
-	event.preventDefault();
-
-	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-	document.addEventListener( 'mouseup', onDocumentMouseUp, false );
-	document.addEventListener( 'mouseout', onDocumentMouseOut, false );
-
-	mouseXOnMouseDown = event.clientX - windowHalfX;
-	
-}
-
-function onDocumentMouseMove( event ) {
-
-	mouseX = event.clientX - windowHalfX;
-
-	
-}
-
-function onDocumentMouseUp( event ) {
-
-	document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-	document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-	document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
-
-}
-
-function onDocumentMouseOut( event ) {
-
-	document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-	document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-	document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
-
-}
-
-function onDocumentTouchStart( event ) {
-
-	if ( event.touches.length === 1 ) {
-
-		event.preventDefault();
-
-		mouseXOnMouseDown = event.touches[ 0 ].pageX - windowHalfX;
-	
-	}
-
-}
-
-function onDocumentTouchMove( event ) {
-
-	if ( event.touches.length === 1 ) {
-
-		event.preventDefault();
-
-		mouseX = event.touches[ 0 ].pageX - windowHalfX;
-
-	}
-
-}
-
-//
-
 function animate() {
 
 	requestAnimationFrame( animate );
@@ -188,11 +118,11 @@ function animate() {
 
 function render() {
 	var xAxis = new THREE.Vector3(0,1,0);
-	rotateAroundObjectAxis(group, xAxis, currentRotation);
-	//var yAxis = new THREE.Vector3(0,0,-1);
-	//rotateAroundWorldAxis(group, yAxis, currentRoll);
-	//var zAxis = new THREE.Vector3(1,0,0);
-	//rotateAroundWorldAxis(group, zAxis, currentPitch);
+	rotateAroundWorldAxis(group, xAxis, currentRotation);
+	var yAxis = new THREE.Vector3(0,0,1);
+	rotateAroundObjectAxis(group, yAxis, currentRoll);
+	var zAxis = new THREE.Vector3(1,0,0);
+	rotateAroundObjectAxis(group, zAxis, currentPitch);
 
 
 	renderer.render( scene, camera );
