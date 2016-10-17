@@ -30,8 +30,6 @@ func main() {
 	go boat.IngestGPSD(ingestChannel)
 	go boat.Connect(broadcatsChannel, interrupt, addr)
 
-	lastBoat := boat.NewBoat()
-
 	for {
 		select {
 		case b := <-ingestChannel:

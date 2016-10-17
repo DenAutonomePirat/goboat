@@ -28,10 +28,13 @@ func Listen() {
 	game.DefaultLegDistanceInMeters = 500
 
 	web := NewWeb()
+	db := NewStore()
 
-	//users := NewStore()
-	//defer users.db.Close()
+	u := NewUser()
+	u.SetPassword("jeg elsker at lege med kokmputere")
+	fmt.Println(u.HashedPassword)
 
+	fmt.Println(u.CheckPassword("jeg elsker at lege med komputere"))
 	go func() {
 
 		for {
@@ -43,13 +46,14 @@ func Listen() {
 			if c["class"] == "User" {
 				u := NewUser()
 				json.Unmarshal(msg, &u)
-				fmt.Printf("User %d send data\n", u.Id)
+				fmt.Printf("The user %s send data\n", u.Name)
 			}
 
 			if c["class"] == "Boat" {
 				b := boat.NewBoat()
 				fmt.Printf("Message recieved\n")
 				json.Unmarshal(msg, &b)
+				db.AddTrack(b)
 				web.mux.Broadcast <- b
 			}
 
