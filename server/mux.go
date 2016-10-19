@@ -70,6 +70,9 @@ var upgrader = websocket.Upgrader{
 
 // serveWs handles websocket requests from the peer.
 func (m *Mux) Handle(w http.ResponseWriter, r *http.Request) {
+	//get cookie and check validity
+	//deny or accept
+	//if accept set *conn pointer
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 
@@ -78,6 +81,6 @@ func (m *Mux) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn := NewConn(m, ws)
+	conn := NewConn(m, ws) //set user pointer
 	m.register <- conn
 }

@@ -4,9 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/json"
-	"errors"
-	"fmt"
-	"github.com/denautonomepirat/goboat/boat"
+
 	"golang.org/x/crypto/scrypt"
 	"io"
 	"log"
@@ -14,18 +12,19 @@ import (
 )
 
 type User struct {
-	Name           string           `json:"name"`
-	HashedPassword []byte           `bson:"hashedPassword"`
-	Salt           []byte           `bson:"salt"`
-	connection     *Conn            `json:"-"bson:"-"`
-	Online         bool             `json:"online"`
-	ConnectedAt    time.Time        `json:"connected_at"`
-	OnlineDuration time.Duration    `json:"onlineDuration"`
-	Waypoints      [3]boat.Waypoint `json:"waypoints"`
+	UserName       string    `json:"userName"bson:"userName"`
+	HashedPassword []byte    `bson:"hashedPassword"`
+	Salt           []byte    `bson:"salt"`
+	Created        time.Time `json:"created"bson:"created"`
+	Online         bool      `json:"online"`
+	connection     *Conn
 }
 
 func NewUser() *User {
 	u := User{}
+	u.Created = time.Now()
+	u.HashedPassword = make([]byte, 64)
+	u.Salt = make([]byte, 32)
 	return &u
 }
 
@@ -45,35 +44,30 @@ func (u *User) SetPassword(password string) {
 		log.Fatal(err)
 	}
 	u.HashedPassword = hash
-	fmt.Printf("%x\n", hash)
-
 }
 
-func (u *User) CheckPassword(passwordToTest string) error {
+func (u *User) CheckPassword(passwordToTest string) bool {
 
 	hashToCompare, err := scrypt.Key([]byte(passwordToTest), u.Salt, 1<<14, 8, 1, 64)
-
-	fmt.Printf("%x\n", u.HashedPassword)
-	fmt.Printf("%x\n", hashToCompare)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if subtle.ConstantTimeCompare(hashToCompare, u.HashedPassword) == 1 {
-		return nil
+		return true
 	}
-	return errors.New("Password didn't match")
+	return false
 
 }
 
-func (u *User) WaypointReached() {
-	u.Waypoints[0] = u.Waypoints[1]
-	u.Waypoints[1] = u.Waypoints[2]
-	u.Waypoints[2] = boat.Waypoint{}
+type Session struct {
+	UserName       string        `json:"UserName"bson:"userName`
+	Id             []byte        `json:"id"bson:"id"`
+	ConnectedAt    time.Time     `json:"connectedAt"bson:"connectedAt"`
+	OnlineDuration time.Duration `json:"onlineDuration"`
 }
 
-func (u *User) SetWaypoint(n int, w *boat.Waypoint) {
-	u.Waypoints[n] = *w
-	fmt.Printf("User %s changed waypoint %d\n", u.Name, n)
+func name() {
+
 }

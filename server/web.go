@@ -1,19 +1,24 @@
 package server
 
 import (
+	"fmt"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
 type Web struct {
+	db  *Store
 	mux *Mux
 }
 
-func NewWeb() *Web {
-	return &Web{mux: NewMux()}
+func NewWeb(s *Store) *Web {
+	return &Web{
+		mux: NewMux(),
+		db:  s,
+	}
 }
 
-func (w *Web) ListenAndServe(g *GameSetup) {
+func (w *Web) ListenAndServe(g *Configuration) {
 
 	r := gin.Default()
 	store := sessions.NewCookieStore([]byte("secret"))
@@ -28,8 +33,18 @@ func (w *Web) ListenAndServe(g *GameSetup) {
 		c.Redirect(301, "/assets/index.html")
 	})
 
-	r.GET("/logon", func(c *gin.Context) {
-		c.Redirect(301, "/assets/logon.html")
+	r.GET("/login", func(c *gin.Context) {
+		u := NewUser()
+		uname, _ := c.GetQuery("u")
+		pwd, _ := c.GetQuery("p")
+		_, u = w.db.getUser(uname)
+		pwdcheck := u.CheckPassword(pwd)
+		if pwdcheck {
+			fmt.Println("match")
+			c.Redirect(301, "/assets/index.html")
+			return
+		}
+		c.Redirect(301, "/assets/login2.html")
 	})
 
 	r.GET("/api/gamesetup", func(c *gin.Context) {

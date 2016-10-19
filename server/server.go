@@ -13,28 +13,34 @@ func Listen() {
 	flag.Parse()
 	log.SetFlags(0)
 
-	game := NewGameSetup()
+	conf := NewConfiguration()
 
-	game.Start.Coordinate[0] = 56.72161
-	game.Start.Coordinate[1] = 8.21222
-	game.Start.Name = "start"
+	conf.Start.Coordinate[0] = 56.72161
+	conf.Start.Coordinate[1] = 8.21222
+	conf.Start.Name = "start"
 
-	game.Finish.Coordinate[0] = 56.96487
-	game.Finish.Coordinate[1] = 10.36663
-	game.Finish.Name = "finish"
+	conf.Finish.Coordinate[0] = 56.96487
+	conf.Finish.Coordinate[1] = 10.36663
+	conf.Finish.Name = "finish"
 
-	game.WaypointsAllowed = 3
+	conf.WaypointsAllowed = 3
 
-	game.DefaultLegDistanceInMeters = 500
+	conf.DefaultLegDistanceInMeters = 500
 
-	web := NewWeb()
 	db := NewStore()
-
+	web := NewWeb(db)
+	fmt.Println("DB ok")
 	u := NewUser()
-	u.SetPassword("jeg elsker at lege med kokmputere")
-	fmt.Println(u.HashedPassword)
+	u.UserName = "Thomas"
+	u.SetPassword("password")
+	db.AddUser(u)
 
-	fmt.Println(u.CheckPassword("jeg elsker at lege med komputere"))
+	r := NewUser()
+	_, r = db.getUser("Thomas")
+	fmt.Printf("%s\n", r.Marshal())
+
+	fmt.Println(r.CheckPassword("password"))
+
 	go func() {
 
 		for {
@@ -46,7 +52,7 @@ func Listen() {
 			if c["class"] == "User" {
 				u := NewUser()
 				json.Unmarshal(msg, &u)
-				fmt.Printf("The user %s send data\n", u.Name)
+				fmt.Printf("The user %s send data\n", u.UserName)
 			}
 
 			if c["class"] == "Boat" {
@@ -59,5 +65,5 @@ func Listen() {
 
 		}
 	}()
-	web.ListenAndServe(game)
+	web.ListenAndServe(conf)
 }

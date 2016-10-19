@@ -5,21 +5,19 @@ import (
 	"github.com/denautonomepirat/goboat/boat"
 )
 
-type GameSetup struct {
-	Class                      string        `json:"class"`
+type Configuration struct {
 	Start                      boat.Waypoint `json:"start"`
 	Finish                     boat.Waypoint `json:"finish"`
 	WaypointsAllowed           int           `json:"waypointsAllowed"`
 	DefaultLegDistanceInMeters float64       `json:"DefaultLegDistanceInMeters"`
 }
 
-func NewGameSetup() *GameSetup {
-	g := GameSetup{}
-	g.Class = "GameSetup"
-	return &g
+func NewConfiguration() *Configuration {
+	c := Configuration{}
+	return &c
 }
 
-func (g *GameSetup) Marshal() *[]byte {
-	encoded, _ := json.Marshal(g)
+func (c *Configuration) Marshal() *[]byte {
+	encoded, _ := json.Marshal(c)
 	return &encoded
 }
