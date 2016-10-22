@@ -5,13 +5,76 @@ $(function() {
 	currentRotation = 90;
 	currentRoll = 0;
 	currentPitch = 0;
-
+	
 	
 	skipper = new Skipper();
+	data = new TimeSeries();
+	var chart = new SmoothieChart(	
+		{
+			millisPerPixel:200,
+			maxValueScale:1,
+			scaleSmoothing:1,
+			
+			grid:{
+				fillStyle:'rgba(255, 255, 255,0.50)',
+				strokeStyle:'rgba(119,119,119,0.89)',
+				sharpLines:true,
+				millisPerLine:10000,
+				verticalSections:4,
+				borderVisible:true
+			},
+			
+			labels:{
+				fillStyle:'rgba(50,50,200,0.81)',
+				disabled:false,
+				fontSize:13,
+				precision:1
+			},
+
+			timestampFormatter:SmoothieChart.timeFormatter,
+			maxValue:90,
+			minValue:-90,
+			yRangeFunction:myYRangeFunction,
+			horizontalLines:[{
+				color:'#ffffff',
+				lineWidth:1,
+				value:0
+			},
+			{
+				color:'#880000',
+				lineWidth:2,
+				value:45
+			},
+			{
+				color:'#008800',
+				lineWidth:2,
+				value:-45
+			}
+			]
+		}
+
+	);
+	chart.addTimeSeries(data, { strokeStyle: 'rgba(0, 0, 0, 1)', lineWidth: 1 });
+	chart.streamTo(document.getElementById("chart"), 100);
+
+
 });
+
+
+function myYRangeFunction(range) {
+  // TODO implement your calculation using range.min and range.max
+  var min = -90;
+  var max = 90;
+  return {min: min, max: max};
+}
+
+
+
+
 
 var Skipper = function() {
 
+	
 	
 	console.log("Downloading game setup");
 	var gameSettings = JSON.parse(httpGet(location.origin + "/api/gamesetup"));
@@ -64,6 +127,9 @@ Skipper.prototype.onMessage = function(msg) {
 			currentRotation = msg.navigation.heading*-0.0174532925;
 			currentRoll = msg.navigation.roll*0.0174532925;
 			currentPitch = msg.navigation.pitch*-0.0174532925;
+			data.append( msg.timestamp, msg.navigation.roll);	
+
+
 		}
 		
 

@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/denautonomepirat/goboat/boat"
+	"github.com/denautonomepirat/goboat/udp"
 	"log"
 	"os"
 	"os/signal"
@@ -18,22 +18,23 @@ func main() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	fmt.Printf("Morning, Started at %s \n ", time.Now())
+	log.Printf("Morning")
 
 	flag.Parse()
 	log.SetFlags(0)
 
 	ingestChannel := make(chan *boat.Boat)
-	broadcatsChannel := make(chan boat.Muxable)
+	//broadcatsChannel := make(chan boat.Muxable)
 
 	go boat.Ingest(*port, ingestChannel)
 	go boat.IngestGPSD(ingestChannel)
-	go boat.Connect(broadcatsChannel, interrupt, addr)
+	//go boat.Connect(broadcatsChannel, interrupt, addr)
+	c := udp.NewUdpClient("10.0.0.1", "10001")
 
 	for {
 		select {
 		case b := <-ingestChannel:
-			broadcatsChannel <- b
+			c.Send <- b
 		case i := <-interrupt:
 			log.Println("Stopping goroutines")
 			interrupt <- i

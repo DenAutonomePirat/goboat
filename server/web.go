@@ -27,7 +27,7 @@ func (w *Web) makeCookie(c *gin.Context) {
 	temp := make([]byte, 16)
 	rand.Read(temp)
 	token := string(temp)
-	w.tokens[token] = time.Now().Add(time.Minute)
+	w.tokens[token] = time.Now().Add(time.Hour * 72)
 	session.Set("token", token)
 	session.Save()
 }
@@ -39,7 +39,7 @@ func (w *Web) checkCookieToken(c *gin.Context) bool {
 		return false
 	}
 	if time.Now().Before(w.tokens[token]) {
-		w.tokens[token] = time.Now().Add(time.Minute)
+		w.tokens[token] = time.Now().Add(time.Hour * 72)
 		return true
 	}
 	return false

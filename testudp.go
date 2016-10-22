@@ -9,22 +9,23 @@ import (
 
 func main() {
 
-	s := udp.NewUdpServer("10001")
+	s := udp.NewUdpServer("10005")
 	go func() {
 
 		for {
 			r := boat.NewBoat()
 			r = <-s.Recieve
-			fmt.Printf("Er det mig %v\n", r.Power.Amperes)
+			fmt.Printf("Er det mig %v\n", r.Navigation.HeadingMagnetic)
 		}
 	}()
 
 	c := udp.NewUdpClient("10.0.0.11", "10001")
 	t := boat.NewBoat()
-	t.Power.Amperes = 20
+	t.Navigation.HeadingMagnetic = 0.0
 	for {
 
 		c.Send <- t
-		time.Sleep(time.Second)
+		t.Navigation.HeadingMagnetic += 1.1
+		time.Sleep(time.Millisecond * 100)
 	}
 }

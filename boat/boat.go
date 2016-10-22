@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 )
 
 func CheckGracefull(err error) {
@@ -20,6 +21,7 @@ func Check(err error) {
 
 type Boat struct {
 	Class      string     `json:"class"bson:"-"`
+	TimeStamp  int64      `json:"timestamp"bson:"timestamp"`
 	Navigation Nav        `json:"navigation,omitempty"bson:"navigation,omitempty"`
 	Power      Electrical `json:"power,omitempty"bson:"power,omitempty"`
 	Route      []Route    `json:"route,omitempty"bson:"route,omitempty"`
@@ -28,6 +30,7 @@ type Boat struct {
 func NewBoat() *Boat {
 	b := Boat{}
 	b.Class = "Boat"
+	b.TimeStamp = int64(time.Now().UnixNano() / 1000 / 1000)
 	return &b
 }
 

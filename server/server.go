@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+
 	"github.com/denautonomepirat/goboat/boat"
+	rednet "github.com/denautonomepirat/goboat/udp"
 	"log"
 )
 
@@ -28,29 +30,33 @@ func Listen() {
 	conf.DefaultLegDistanceInMeters = 500
 
 	db := NewStore()
-
+	udp := rednet.NewUdpServer("10001")
 	web := NewWeb(db)
 
 	go func() {
 
 		for {
-
-			msg := <-web.mux.Recieve
-			var c map[string]interface{}
-			json.Unmarshal(msg, &c)
-
-			if c["class"] == "User" {
-				u := NewUser()
-				json.Unmarshal(msg, &u)
-				fmt.Printf("The user %s send data\n", u.UserName)
-			}
-
-			if c["class"] == "Boat" {
-				b := boat.NewBoat()
-				fmt.Printf("Message recieved\n")
-				json.Unmarshal(msg, &b)
-				db.AddTrack(b)
+			select {
+			case b := <-udp.Recieve:
 				web.mux.Broadcast <- b
+
+			case msg := <-web.mux.Recieve:
+				var c map[string]interface{}
+				json.Unmarshal(msg, &c)
+
+				if c["class"] == "User" {
+					u := NewUser()
+					json.Unmarshal(msg, &u)
+					fmt.Printf("The user %s send data\n", u.UserName)
+				}
+
+				if c["class"] == "Boat" {
+					b := boat.NewBoat()
+					fmt.Printf("Message recieved\n")
+					json.Unmarshal(msg, &b)
+					db.AddTrack(b)
+					web.mux.Broadcast <- b
+				}
 			}
 
 		}
