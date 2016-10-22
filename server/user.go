@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/json"
-
 	"golang.org/x/crypto/scrypt"
 	"io"
 	"log"
@@ -61,7 +60,7 @@ func (u *User) CheckPassword(passwordToTest string) bool {
 
 }
 
-type Session struct {
+type Skipper struct {
 	UserName       string        `json:"UserName"bson:"userName`
 	Id             []byte        `json:"id"bson:"id"`
 	ConnectedAt    time.Time     `json:"connectedAt"bson:"connectedAt"`

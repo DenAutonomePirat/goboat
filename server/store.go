@@ -2,11 +2,10 @@ package server
 
 import (
 	"fmt"
-	"time"
-
 	"github.com/denautonomepirat/goboat/boat"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"time"
 )
 
 type Store struct {
@@ -45,15 +44,15 @@ func (s *Store) AddUser(u *User) error {
 	_, err := s.db.DB("redboat").C("users").Upsert(bson.M{"name": u.UserName}, u)
 	return err
 }
-func (s *Store) getUser(u string) (error, *User) {
+func (s *Store) getUser(u string) (*User, error) {
 	result := NewUser()
 	c := s.db.DB("redboat").C("users")
 	err := c.Find(bson.M{"userName": u}).One(result)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
-		return err, result
+		return result, err
 	}
-	return err, result
+	return result, err
 }
 
 func (s *Store) AddTrack(b *boat.Boat) error {

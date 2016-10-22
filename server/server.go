@@ -28,18 +28,8 @@ func Listen() {
 	conf.DefaultLegDistanceInMeters = 500
 
 	db := NewStore()
+
 	web := NewWeb(db)
-	fmt.Println("DB ok")
-	u := NewUser()
-	u.UserName = "Thomas"
-	u.SetPassword("password")
-	db.AddUser(u)
-
-	r := NewUser()
-	_, r = db.getUser("Thomas")
-	fmt.Printf("%s\n", r.Marshal())
-
-	fmt.Println(r.CheckPassword("password"))
 
 	go func() {
 
