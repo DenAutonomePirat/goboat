@@ -150,10 +150,22 @@ L.Map.prototype.initGame = function(data){
 };
 
 L.Marker.prototype.on('dragend', function(e) {
-    skipper.send("{\"class\":\"User\"}");
-    console.log(e.target.options.title);
+    
+    var msg = {
+    class: "user",
+    wpt: e.target.options.title,
+    latlng: e.target._latlng
+};
+    console.log(e)
+    skipper.send(msg);
 });
 
-//L.Marker.prototype.on('move', function(){
-    //skipper.map.updateGame();
+//L.Marker.prototype.on('move', function(e){
+//  var msg = {
+//      class: "user",
+//      wpt: e.target.options.title,
+//      latlng: e.target._latlng
+//  };
+//      console.log(e)
+//      skipper.send(msg);
 //});

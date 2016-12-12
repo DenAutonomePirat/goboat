@@ -3,19 +3,7 @@
   <head>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css">
-    <title></title>
     
-  </head>
-  <body>
-    <div id="mapdiv">
-      <div id="map">
-        <div id="model">
-          <div id="modelSTL">
-          </div>
-        </div>
-      <canvas id="chart" width="600" height="200"></canvas>
-      </div>
-    </div>
     <script src="/javascripts/smoothie.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="/javascripts/reconnecting-websocket.min.js"></script>
@@ -25,5 +13,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
     <script src="/javascripts/STLLoader.js"></script>
     <script src="/javascripts/model.js"></script>
+    
+    <title>"With the bravery of being out of range"</title>
+    
+  </head>
+  <body>
+
+    <form  action="/login" method="post">
+      <button id="logout" name="action" value="logout" class="btn btn-primary btn-block btn-large btn-faded">Logout</button>
+    </form>
+    <div id="map">
+      <div id="model"></div>
+      <canvas id="chart" width="600" height="200"></canvas>
+      <iframe id="video" src="https://www.youtube.com/embed/live_stream?channel=UC2E0cmYYk1YRFAk1DF7Nx_A&autoplay=1" frameborder="0" allowfullscreen"></iframe>
+      
+    </div>
   </body>
 </html>

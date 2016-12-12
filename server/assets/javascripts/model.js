@@ -18,7 +18,7 @@ animate();
 });
 function init() {
 
-	container = document.getElementById("modelSTL");
+	container = document.getElementById("model");
 
 
 	camera = new THREE.PerspectiveCamera( 20, container.offsetWidth / container.offsetHeight, 1, 6000 );

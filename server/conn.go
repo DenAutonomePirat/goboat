@@ -6,15 +6,20 @@ import (
 )
 
 type Conn struct {
-	Uses   *User
+	Token  string
 	Output chan []byte
 	socket *websocket.Conn
 	mux    *Mux
 }
 
-func NewConn(m *Mux, s *websocket.Conn) *Conn {
+func NewConn(m *Mux, s *websocket.Conn, t string) *Conn {
 
-	conn := Conn{Output: make(chan []byte), socket: s, mux: m}
+	conn := Conn{
+		Output: make(chan []byte),
+		socket: s,
+		mux:    m,
+		Token:  t,
+	}
 
 	go conn.read()
 	go conn.write()

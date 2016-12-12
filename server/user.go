@@ -60,13 +60,19 @@ func (u *User) CheckPassword(passwordToTest string) bool {
 
 }
 
-type Skipper struct {
+type SkipperWatch struct {
 	UserName       string        `json:"UserName"bson:"userName`
 	Id             []byte        `json:"id"bson:"id"`
 	ConnectedAt    time.Time     `json:"connectedAt"bson:"connectedAt"`
 	OnlineDuration time.Duration `json:"onlineDuration"`
+	Expiry         time.Time
 }
 
+func newSkipperWatch() *SkipperWatch {
+	s := SkipperWatch{}
+	return &s
+
+}
 func name() {
 
 }

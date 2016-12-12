@@ -33,6 +33,11 @@ func Listen() {
 	udp := rednet.NewUdpServer("10001")
 	web := NewWeb(db)
 
+	user := NewUser()
+	user.UserName = "Thomas"
+	user.SetPassword("password")
+	db.AddUser(user)
+
 	go func() {
 
 		for {
@@ -44,10 +49,8 @@ func Listen() {
 				var c map[string]interface{}
 				json.Unmarshal(msg, &c)
 
-				if c["class"] == "User" {
-					u := NewUser()
-					json.Unmarshal(msg, &u)
-					fmt.Printf("The user %s send data\n", u.UserName)
+				if c["class"] == "user" {
+					fmt.Printf("User %s changed the %s waypoint to:\nLatitude: \t%s\n", c["user"], c["wpt"], c["lat"])
 				}
 
 				if c["class"] == "Boat" {

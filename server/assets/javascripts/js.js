@@ -2,9 +2,10 @@ $(function() {
 	console.log("Setting default positions")
 	currentLat = 56.72052; 
 	currentLon = 8.21297;
-	currentRotation = 90;
+	currentRotation = 0;
 	currentRoll = 0;
 	currentPitch = 0;
+	userName = "";
 	
 	
 	skipper = new Skipper();
@@ -79,6 +80,11 @@ var Skipper = function() {
 	console.log("Downloading game setup");
 	var gameSettings = JSON.parse(httpGet(location.origin + "/api/gamesetup"));
 	console.log(gameSettings);
+	
+	userName = JSON.parse(httpGet(location.origin + "/api/whoami"));
+	console.log(userName);
+	document.getElementById("logout").innerHTML="logged in as " +userName;
+	
 	var map = new Map();
 	map.initGame(gameSettings);
 
@@ -128,22 +134,35 @@ Skipper.prototype.onMessage = function(msg) {
 			currentRoll = msg.navigation.roll*0.0174532925;
 			currentPitch = msg.navigation.pitch*-0.0174532925;
 			data.append( msg.timestamp, msg.navigation.roll);	
-
-
 		}
-		
-
 		return
 	}
 	console.log("unknown message");
 };
 
 Skipper.prototype.send = function(msg) {
-	console.log(msg);
+	msg.user = userName;
+	console.log(JSON.stringify(msg));
 	if (this.conn.readyState){
-		this.conn.send(msg);
-	}
-}
+		this.conn.send(JSON.stringify(msg));
+	};
+};
+
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length,c.length);
+        }
+    }
+    return ""
+};
 
 function httpGet(theUrl)
 {
@@ -151,4 +170,4 @@ function httpGet(theUrl)
     xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
     xmlHttp.send( null );
     return xmlHttp.responseText;
-}
+};

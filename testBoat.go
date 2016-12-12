@@ -7,5 +7,5 @@ import (
 
 func main() {
 	b := boat.NewBoat()
-	fmt.Printf("%s", b.Marshal())
+	fmt.Println(b.Marshal())
 }

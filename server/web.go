@@ -9,25 +9,31 @@ import (
 )
 
 type Web struct {
-	db     *Store
-	mux    *Mux
-	tokens map[string]time.Time
+	db   *Store
+	mux  *Mux
+	Crew map[string]*SkipperWatch
 }
 
 func NewWeb(s *Store) *Web {
 	return &Web{
-		mux:    NewMux(),
-		db:     s,
-		tokens: make(map[string]time.Time),
+		mux:  NewMux(),
+		db:   s,
+		Crew: make(map[string]*SkipperWatch),
 	}
 }
 
-func (w *Web) makeCookie(c *gin.Context) {
+func (w *Web) newCookie(c *gin.Context, u *User) {
 	session := sessions.Default(c)
+	watch := newSkipperWatch()
+	watch.UserName = u.UserName
+	watch.Expiry = time.Now().Add(time.Hour * 72)
+
 	temp := make([]byte, 16)
 	rand.Read(temp)
 	token := string(temp)
-	w.tokens[token] = time.Now().Add(time.Hour * 72)
+	fmt.Println(token)
+
+	w.Crew[token] = watch
 	session.Set("token", token)
 	session.Save()
 }
@@ -38,11 +44,31 @@ func (w *Web) checkCookieToken(c *gin.Context) bool {
 	if !ok {
 		return false
 	}
-	if time.Now().Before(w.tokens[token]) {
-		w.tokens[token] = time.Now().Add(time.Hour * 72)
-		return true
+
+	if crew, ok := w.Crew[token]; ok {
+		if time.Now().Before(crew.Expiry) {
+			w.Crew[token].Expiry = time.Now().Add(time.Hour * 72)
+			return true
+		}
 	}
 	return false
+}
+
+func (w *Web) getUserFromCookieToken(c *gin.Context) string {
+	session := sessions.Default(c)
+	token, ok := session.Get("token").(string)
+	if !ok {
+		return ""
+	}
+	return w.Crew[token].UserName
+}
+
+func (w *Web) removeCookie(c *gin.Context) {
+	session := sessions.Default(c)
+	token, _ := session.Get("token").(string)
+	fmt.Println(token)
+	delete(w.Crew, token)
+	fmt.Println(token)
 }
 
 func (w *Web) ListenAndServe(g *Configuration) {
@@ -72,18 +98,32 @@ func (w *Web) ListenAndServe(g *Configuration) {
 		c.Redirect(303, "/assets/login.html")
 	})
 
-	r.GET("/login", func(c *gin.Context) {
+	r.POST("/login", func(c *gin.Context) {
+
+		if c.PostForm("action") == "logout" {
+			w.removeCookie(c)
+			c.Redirect(303, "/assets/login.html")
+			return
+		}
+
 		u := NewUser()
-		uname, _ := c.GetQuery("u")
-		pwd, _ := c.GetQuery("p")
+
+		uname := c.PostForm("uname")
+		pwd := c.PostForm("psw")
+		fmt.Println(uname)
+
 		u, _ = w.db.getUser(uname)
 
 		if u.CheckPassword(pwd) {
 			fmt.Println("match")
-			w.makeCookie(c)
+			w.newCookie(c, u)
 			c.Redirect(303, "/assets")
 			return
 		}
+		c.Redirect(303, "/assets/login.html")
+	})
+
+	r.GET("/login", func(c *gin.Context) {
 		c.Redirect(303, "/assets/login.html")
 	})
 
@@ -93,9 +133,20 @@ func (w *Web) ListenAndServe(g *Configuration) {
 		}
 	})
 
+	r.GET("/api/whoami", func(c *gin.Context) {
+		if w.checkCookieToken(c) {
+			c.JSON(200, w.getUserFromCookieToken(c))
+		}
+	})
+
 	r.GET("/ws", func(c *gin.Context) {
 		if w.checkCookieToken(c) {
-			w.mux.Handle(c.Writer, c.Request)
+			session := sessions.Default(c)
+			token, ok := session.Get("token").(string)
+			if !ok {
+				fmt.Println("Fuck shit")
+			}
+			w.mux.Handle(c.Writer, c.Request, token)
 		}
 	})
 	r.Run()
