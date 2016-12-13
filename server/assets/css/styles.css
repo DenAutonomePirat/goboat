@@ -20,7 +20,7 @@ html, body
 	width: 400px;
 	top:0;
 	right:0;
-	z-index: 1; 
+	z-index: 10; 
 	position:absolute;	
 	}
 	
@@ -28,6 +28,7 @@ html, body
 	margin-top: 8px;
 	margin-right: 308px;
 	height: 300px;
+	z-index: 10;
 }
 
 
@@ -37,14 +38,14 @@ html, body
 	position: absolute;
 	top: 400px;
 	right: 8px;
-	z-index: 1;
+	z-index: 10;
 	}
 
 #chart {
 	position: absolute;
 	bottom: 0;
 	left: 0;
-	z-index: 1;
+	z-index: 10;
 }
 
 

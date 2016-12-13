@@ -6,19 +6,19 @@ import (
 )
 
 type Conn struct {
-	Token  string
+	User   string
 	Output chan []byte
 	socket *websocket.Conn
 	mux    *Mux
 }
 
-func NewConn(m *Mux, s *websocket.Conn, t string) *Conn {
+func NewConn(m *Mux, s *websocket.Conn, u string) *Conn {
 
 	conn := Conn{
 		Output: make(chan []byte),
 		socket: s,
 		mux:    m,
-		Token:  t,
+		User:   u,
 	}
 
 	go conn.read()
@@ -54,6 +54,7 @@ func (c *Conn) read() {
 			log.Printf("Error reading message from %p: %s", c, err.Error())
 			break
 		}
+		log.Printf("User %s", c.User)
 		c.mux.Recieve <- msg
 	}
 }

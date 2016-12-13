@@ -5,6 +5,7 @@ import (
 )
 
 func main() {
-	go server.Listen()
+	master := server.NewServer()
+	go master.Listen()
 	select {}
 }

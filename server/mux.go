@@ -47,13 +47,13 @@ func (m *Mux) loop() {
 		case conn = <-m.register:
 			//register new connection
 			m.connections[conn] = true
-			log.Printf("Client registered: %p, %d total.", conn, len(m.connections))
+			log.Printf("Client registered: %s, %d total.", conn.User, len(m.connections))
 
 		case conn = <-m.unregister:
 			//remove connection
 			delete(m.connections, conn)
 			close(conn.Output)
-			log.Printf("Client unregistered: %p, %d total.", conn, len(m.connections))
+			log.Printf("Client unregistered: %s, %d total.", conn.User, len(m.connections))
 
 		case muxable = <-m.Broadcast:
 			msg = muxable.Marshal()
@@ -70,7 +70,7 @@ var upgrader = websocket.Upgrader{
 }
 
 // serveWs handles websocket requests from the peer.
-func (m *Mux) Handle(w http.ResponseWriter, r *http.Request, t string) {
+func (m *Mux) Handle(w http.ResponseWriter, r *http.Request, u string) {
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 
@@ -78,6 +78,6 @@ func (m *Mux) Handle(w http.ResponseWriter, r *http.Request, t string) {
 		log.Printf("Could not upgrade http request: %s", err.Error())
 		return
 	}
-	conn := NewConn(m, ws, t) //set user pointer
+	conn := NewConn(m, ws, u) //set user pointer
 	m.register <- conn
 }

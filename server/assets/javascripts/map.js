@@ -56,21 +56,30 @@ function Map(){
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
         maxZoom: 18
-    }).addTo(this.map);
+    }).addTo(this.map,true);
 
     L.tileLayer('http://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
         maxZoom: 18
-    }).addTo(this.map);
-
+    }).addTo(this.map).true;
 
     return this.map;
 }
 
 
 L.Map.prototype.updateGame = function(){
-    this.route.setLatLngs([this.boat.getLatLng(),this.firstWaypoint.getLatLng(),this.secondWaypoint.getLatLng(),this.markerFinish.getLatLng()]);
-    this.boat.setIconAngle(currentRotation/Math.PI*-180);
     this.boat.setLatLng([currentLat,currentLon]);
+    
+    this.pointList = [this.boat.getLatLng()];
+
+    
+    for (i = 0; i < this.waypoints.length; i++) { 
+        this.pointList.push(this.waypoints[i].getLatLng())
+    }
+    this.pointList.push(this.markerFinish.getLatLng())
+    
+    this.route.setLatLngs(this.pointList);
+
+    this.boat.setIconAngle(currentRotation/Math.PI*-180);
 
     
 };
@@ -99,14 +108,14 @@ L.Map.prototype.initGame = function(data){
         popupAnchor: [64, 30]
     });
 
-    this.markerStart = L.marker([data.start.coordinate[0], 8.21222],{
+    this.markerStart = L.marker([data.start.coordinate[0], data.start.coordinate[1]],{
         title: 'Start',
         icon: this.start,
         opacity: 0.5
     });
     this.markerStart.addTo(this);
 
-    this.markerFinish = L.marker([56.96487, 10.36663],{
+    this.markerFinish = L.marker([data.finish.coordinate[0], data.finish.coordinate[1]],{
         title: 'Finish',
         icon: this.finish,
         opacity: 0.5
@@ -122,21 +131,20 @@ L.Map.prototype.initGame = function(data){
 
     this.boat.addTo(this);
 
-    this.firstWaypoint = L.marker([56.71091, 8.2267],{
+    this.pointList = [this.boat.getLatLng()];
+
+    this.waypoints = [];
+
+for (i = 0; i < data.waypointsAllowed; i++) { 
+    this.waypoints.push(L.marker([56+(0.001*i),8+(0.001*i)],{
         draggable:true,
-        title:"first"
-    });
+        title:i
+    }))
+    this.waypoints[i].addTo(this);
+    this.pointList.push(this.waypoints[i].getLatLng())
 
-    this.firstWaypoint.addTo(this);
-
-    this.secondWaypoint = L.marker([56.69659, 8.23975],{
-        draggable:true,
-        title:"second"
-
-    });
-    this.secondWaypoint.addTo(this);
-
-    this.pointList = [this.boat.getLatLng(),this.firstWaypoint.getLatLng(),this.secondWaypoint.getLatLng(),this.markerFinish.getLatLng()];
+}
+    this.pointList.push(this.markerFinish.getLatLng())
 
     this.route = new L.Polyline(this.pointList, {
         color: 'red',

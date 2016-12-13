@@ -141,12 +141,8 @@ func (w *Web) ListenAndServe(g *Configuration) {
 
 	r.GET("/ws", func(c *gin.Context) {
 		if w.checkCookieToken(c) {
-			session := sessions.Default(c)
-			token, ok := session.Get("token").(string)
-			if !ok {
-				fmt.Println("Fuck shit")
-			}
-			w.mux.Handle(c.Writer, c.Request, token)
+			userName := w.getUserFromCookieToken(c)
+			w.mux.Handle(c.Writer, c.Request, userName)
 		}
 	})
 	r.Run()

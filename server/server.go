@@ -4,65 +4,76 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-
 	"github.com/denautonomepirat/goboat/boat"
 	rednet "github.com/denautonomepirat/goboat/udp"
 	"log"
 )
 
-func Listen() {
+type Server struct {
+	configuration *Configuration
+	db            *Store
+	udp           *rednet.UdpServer
+	web           *Web
+}
+
+func NewServer() *Server {
+	s := Server{
+		configuration: NewConfiguration(),
+		db:            NewStore(),
+		udp:           rednet.NewUdpServer("10001"),
+	}
+	s.web = NewWeb(s.db)
+
+	return &s
+}
+
+func (s *Server) Listen() {
 	fmt.Println("Morning")
 	flag.Parse()
 	log.SetFlags(0)
 
-	conf := NewConfiguration()
+	s.configuration.Start.Coordinate[0] = 56.72161
+	s.configuration.Start.Coordinate[1] = 8.21222
+	s.configuration.Start.Name = "start"
 
-	conf.Start.Coordinate[0] = 56.72161
-	conf.Start.Coordinate[1] = 8.21222
-	conf.Start.Name = "start"
+	s.configuration.Finish.Coordinate[0] = 56.96487
+	s.configuration.Finish.Coordinate[1] = 10.36663
+	s.configuration.Finish.Name = "finish"
 
-	conf.Finish.Coordinate[0] = 56.96487
-	conf.Finish.Coordinate[1] = 10.36663
-	conf.Finish.Name = "finish"
+	s.configuration.WaypointsAllowed = 4
 
-	conf.WaypointsAllowed = 3
-
-	conf.DefaultLegDistanceInMeters = 500
-
-	db := NewStore()
-	udp := rednet.NewUdpServer("10001")
-	web := NewWeb(db)
+	s.configuration.DefaultLegDistanceInMeters = 500
 
 	user := NewUser()
 	user.UserName = "Thomas"
 	user.SetPassword("password")
-	db.AddUser(user)
+	s.db.AddUser(user)
 
 	go func() {
 
 		for {
 			select {
-			case b := <-udp.Recieve:
-				web.mux.Broadcast <- b
+			case b := <-s.udp.Recieve:
+				s.web.mux.Broadcast <- b
 
-			case msg := <-web.mux.Recieve:
+			case msg := <-s.web.mux.Recieve:
 				var c map[string]interface{}
 				json.Unmarshal(msg, &c)
 
 				if c["class"] == "user" {
-					fmt.Printf("User %s changed the %s waypoint to:\nLatitude: \t%s\n", c["user"], c["wpt"], c["lat"])
+					fmt.Printf("User %s changed waypoint no. %s to:\nLatitude: \t%s\n", c["user"], c["wpt"], c["lat"])
 				}
 
 				if c["class"] == "Boat" {
 					b := boat.NewBoat()
 					fmt.Printf("Message recieved\n")
 					json.Unmarshal(msg, &b)
-					db.AddTrack(b)
-					web.mux.Broadcast <- b
+					s.db.AddTrack(b)
+					s.web.mux.Broadcast <- b
 				}
 			}
 
 		}
 	}()
-	web.ListenAndServe(conf)
+	s.web.ListenAndServe(s.configuration)
 }
