@@ -52,7 +52,7 @@
 
 function Map(){
 
-    this.map = L.map('map').setView([56.8835, 9.37134], 9)
+    this.map = L.map('map').setView([0,0], 3)
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
         maxZoom: 18
@@ -64,6 +64,7 @@ function Map(){
 
     return this.map;
 }
+
 
 
 L.Map.prototype.updateGame = function(){
@@ -108,14 +109,14 @@ L.Map.prototype.initGame = function(data){
         popupAnchor: [64, 30]
     });
 
-    this.markerStart = L.marker([data.start.coordinate[0], data.start.coordinate[1]],{
+    this.markerStart = L.marker(data.start,{
         title: 'Start',
         icon: this.start,
         opacity: 0.5
     });
     this.markerStart.addTo(this);
 
-    this.markerFinish = L.marker([data.finish.coordinate[0], data.finish.coordinate[1]],{
+    this.markerFinish = L.marker(data.finish,{
         title: 'Finish',
         icon: this.finish,
         opacity: 0.5
@@ -155,12 +156,13 @@ for (i = 0; i < data.waypointsAllowed; i++) {
     });
     this.route.addTo(this);
 
+
 };
 
 L.Marker.prototype.on('dragend', function(e) {
     
     var msg = {
-    class: "user",
+    class: "skipper",
     wpt: e.target.options.title,
     latlng: e.target._latlng
 };

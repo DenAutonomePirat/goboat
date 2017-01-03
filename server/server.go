@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/denautonomepirat/goboat/boat"
 	rednet "github.com/denautonomepirat/goboat/udp"
+	"github.com/kellydunn/golang-geo"
 	"log"
 )
 
@@ -23,7 +24,6 @@ func NewServer() *Server {
 		udp:           rednet.NewUdpServer("10001"),
 	}
 	s.web = NewWeb(s.db)
-
 	return &s
 }
 
@@ -32,17 +32,16 @@ func (s *Server) Listen() {
 	flag.Parse()
 	log.SetFlags(0)
 
-	s.configuration.Start.Coordinate[0] = 56.72161
-	s.configuration.Start.Coordinate[1] = 8.21222
-	s.configuration.Start.Name = "start"
+	s.configuration.Start = geo.NewPoint(56.72161, 8.21222)
 
-	s.configuration.Finish.Coordinate[0] = 56.96487
-	s.configuration.Finish.Coordinate[1] = 10.36663
-	s.configuration.Finish.Name = "finish"
+	s.configuration.Finish = geo.NewPoint(56.96487, 10.36663)
+	fmt.Printf("Total distance: %4f\n", s.configuration.Start.GreatCircleDistance(s.configuration.Finish))
 
 	s.configuration.WaypointsAllowed = 4
 
 	s.configuration.DefaultLegDistanceInMeters = 500
+
+	fmt.Printf("%s\n", *s.configuration.Marshal())
 
 	user := NewUser()
 	user.UserName = "Thomas"
@@ -60,8 +59,12 @@ func (s *Server) Listen() {
 				var c map[string]interface{}
 				json.Unmarshal(msg, &c)
 
-				if c["class"] == "user" {
-					fmt.Printf("User %s changed waypoint no. %s to:\nLatitude: \t%s\n", c["user"], c["wpt"], c["lat"])
+				if c["class"] == "skipper" {
+					var sk Skipper
+					if err := json.Unmarshal(msg, &sk); err != nil {
+						panic(err)
+					}
+					fmt.Println(sk.Latlng.GreatCircleDistance(s.configuration.Finish))
 				}
 
 				if c["class"] == "Boat" {

@@ -127,6 +127,10 @@ func (w *Web) ListenAndServe(g *Configuration) {
 		c.Redirect(303, "/assets/login.html")
 	})
 
+	r.GET("/spectate", func(c *gin.Context) {
+		c.Redirect(303, "/assets/spectate.html")
+	})
+
 	r.GET("/api/gamesetup", func(c *gin.Context) {
 		if w.checkCookieToken(c) {
 			c.JSON(200, g)

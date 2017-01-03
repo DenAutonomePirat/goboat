@@ -7,8 +7,8 @@ $(function() {
 	currentPitch = 0;
 	userName = "";
 	
-	
 	skipper = new Skipper();
+
 	data = new TimeSeries();
 	var chart = new SmoothieChart(	
 		{
@@ -77,15 +77,14 @@ var Skipper = function() {
 
 	
 	
+	var map = new Map();
 	console.log("Downloading game setup");
 	var gameSettings = JSON.parse(httpGet(location.origin + "/api/gamesetup"));
 	console.log(gameSettings);
 	
 	userName = JSON.parse(httpGet(location.origin + "/api/whoami"));
-	console.log(userName);
-	document.getElementById("logout").innerHTML="logged in as " +userName;
+	document.getElementById("logout").innerHTML="logout (" +userName+")";
 	
-	var map = new Map();
 	map.initGame(gameSettings);
 
 
@@ -101,12 +100,21 @@ var Skipper = function() {
 		this.conn = conn
 	}
 
+
     setInterval(function () {
     	map.updateGame();
     	//model.update();
     }, 100);
+	
+    setTimeout(function(){
+	var bounds = new L.LatLngBounds(map.pointList);
+	map.fitBounds(bounds)
+    //do what you need here
+}, 2000);
 
 };
+
+
 
 Skipper.prototype.getWsUrl = function() {
 	var loc = window.location,
@@ -119,7 +127,6 @@ Skipper.prototype.getWsUrl = function() {
 	new_uri += "//" + loc.host;
 	new_uri += "/ws";
 	return new_uri
-
 };
 
 Skipper.prototype.onMessage = function(msg) {
@@ -135,6 +142,10 @@ Skipper.prototype.onMessage = function(msg) {
 			currentPitch = msg.navigation.pitch*-0.0174532925;
 			data.append( msg.timestamp, msg.navigation.roll);	
 		}
+		return
+	}
+	if (msg.class == "game"){
+		
 		return
 	}
 	console.log("unknown message");
@@ -164,10 +175,32 @@ function getCookie(cname) {
     return ""
 };
 
-function httpGet(theUrl)
-{
+function httpGet(theUrl) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
     xmlHttp.send( null );
     return xmlHttp.responseText;
 };
+
+function drag_start(event) 
+    {
+    var style = window.getComputedStyle(event.target, null);
+    var str = (parseInt(style.getPropertyValue("left")) - event.clientX) + ',' + (parseInt(style.getPropertyValue("top")) - event.clientY)+ ',' + event.target.id;
+    event.dataTransfer.setData("Text",str);
+    } 
+
+    function drop(event) 
+    {
+    var offset = event.dataTransfer.getData("Text").split(',');
+    var dm = document.getElementById(offset[2]);
+    dm.style.left = (event.clientX + parseInt(offset[0],10)) + 'px';
+    dm.style.top = (event.clientY + parseInt(offset[1],10)) + 'px';
+    event.preventDefault();
+    return false;
+    }
+
+    function drag_over(event)
+    {
+    event.preventDefault();
+    return false;
+    }   

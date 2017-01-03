@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/json"
+	"github.com/kellydunn/golang-geo"
 	"golang.org/x/crypto/scrypt"
 	"io"
 	"log"
@@ -66,6 +67,7 @@ type SkipperWatch struct {
 	ConnectedAt    time.Time     `json:"connectedAt"bson:"connectedAt"`
 	OnlineDuration time.Duration `json:"onlineDuration"`
 	Expiry         time.Time
+	waypoints      []geo.Point
 }
 
 func newSkipperWatch() *SkipperWatch {

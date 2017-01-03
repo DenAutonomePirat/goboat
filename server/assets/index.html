@@ -10,6 +10,9 @@
 
     <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
     <script src="/javascripts/map.js"></script>
+    <script src="/javascripts/geo.js"></script>
+    <script src="/javascripts/Dms.js"></script>
+
     <script src="/javascripts/js.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
     <script src="/javascripts/STLLoader.js"></script>
@@ -20,14 +23,12 @@
   </head>
   <body>
 
+    <div id="map"></div>
     <form  action="/login" method="post">
       <button id="logout" name="action" value="logout" class="btn btn-primary btn-block btn-large btn-faded">Logout</button>
     </form>
-    <div id="map">
-      <div id="model"></div>
-      <canvas id="chart" width="600" height="200"></canvas>
-      <iframe id="video" src="https://www.youtube.com/embed/live_stream?channel=UC2E0cmYYk1YRFAk1DF7Nx_A&autoplay=1" frameborder="0" allowfullscreen"></iframe>
-      
-    </div>
+    <div id="model" ></div>
+    <canvas id="chart" width="600" height="200"></canvas>
+    <iframe id="video"   src="https://www.youtube.com/embed/live_stream?channel=UC2E0cmYYk1YRFAk1DF7Nx_A&autoplay=1" frameborder="0" allowfullscreen = "1"></iframe>
   </body>
 </html>
