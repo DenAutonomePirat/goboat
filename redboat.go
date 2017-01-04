@@ -11,7 +11,7 @@ import (
 )
 
 var addr = flag.String("addr", "46.101.213.117:8080", "http service address")
-var port = flag.String("port", "/dev/ttyACM0", "ingest port /dev/someport")
+var port = flag.String("port", "/dev/ttyACM0", "port /dev/someport")
 
 func main() {
 

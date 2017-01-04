@@ -3,6 +3,7 @@ package boat
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/influxdata/influxdb/client/v2"
 	"log"
 	"time"
 )
@@ -39,6 +40,32 @@ func (b *Boat) Marshal() *[]byte {
 	return &encoded
 }
 
+// weather,location=us-midwest temperature=82 1465839830100400200
+//   |    -------------------- --------------  |
+//   |             |             |             |
+//   |             |             |             |
+// +-----------+--------+-+---------+-+---------+
+// |measurement|,tag_set| |field_set| |timestamp|
+// +-----------+--------+-+---------+-+---------+
+
+func (b *Boat) Influx() *client.Point {
+	// Create a point and add to batch
+	tags := map[string]string{
+		"source": "battery",
+	}
+
+	fields := map[string]interface{}{
+		"volt":   b.Power.Volts,
+		"amp":    b.Power.Amperes,
+		"joules": b.Power.JoulesTotal,
+	}
+	pt, err := client.NewPoint("Power", tags, fields, b.Power.TimeStamp)
+	if err != nil {
+		panic(err.Error())
+	}
+	return pt
+}
+
 type Nav struct {
 	Position         Point   `json:"position,omitempty"bson:"position,omitempty"`
 	SpeedOverGround  float32 `json:"speedGPS,omitempty"bson:"speedGPS,omitempty"`
@@ -60,7 +87,9 @@ type Electrical struct {
 	Volts       float32 `json:"volts,omitempty"bson:"volts,omitempty"`
 	Amperes     float32 `json:"amperes,omitempty"bson:"amperes,omitempty"`
 	JoulesTotal float32 `json:"joules_total,omitempty"bson:"joules_total,omitempty"`
+	TimeStamp   time.Time
 }
+
 type Route struct {
 	Waypoints []Waypoint `json:"waypoints,omitempty"bson:"waypoints,omitempty"`
 }
