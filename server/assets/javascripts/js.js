@@ -85,7 +85,6 @@ var Skipper = function() {
 	userName = JSON.parse(httpGet(location.origin + "/api/whoami"));
 	document.getElementById("logout").innerHTML="logout (" +userName+")";
 	
-	map.initGame(gameSettings);
 
 
 	if (window["WebSocket"]) {
@@ -100,6 +99,7 @@ var Skipper = function() {
 		this.conn = conn
 	}
 
+	map.initGame(gameSettings);
 
     setInterval(function () {
     	map.updateGame();
