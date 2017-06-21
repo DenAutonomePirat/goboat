@@ -30,6 +30,10 @@ func Listen() {
 	conf.DefaultLegDistanceInMeters = 500
 
 	db := NewStore()
+	u := NewUser()
+	u.UserName = "thomas"
+	u.SetPassword("password")
+	db.AddUser(u)
 	udp := rednet.NewUdpServer("10001")
 	web := NewWeb(db)
 
