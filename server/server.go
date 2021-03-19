@@ -5,9 +5,10 @@ import (
 	"flag"
 	"fmt"
 
+	"log"
+
 	"github.com/denautonomepirat/goboat/boat"
 	rednet "github.com/denautonomepirat/goboat/udp"
-	"log"
 )
 
 func Listen() {
@@ -46,12 +47,19 @@ func Listen() {
 
 			case msg := <-web.mux.Recieve:
 				var c map[string]interface{}
+				fmt.Printf("%s", string(msg))
 				json.Unmarshal(msg, &c)
 
 				if c["class"] == "User" {
 					u := NewUser()
 					json.Unmarshal(msg, &u)
 					fmt.Printf("The user %s send data\n", u.UserName)
+					fmt.Printf("payload %v", u)
+				}
+				if c["class"] == "command" {
+					c := boat.Command{}
+					json.Unmarshal(msg, &c)
+					fmt.Printf("payload %v", c)
 				}
 
 				if c["class"] == "Boat" {

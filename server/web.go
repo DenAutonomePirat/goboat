@@ -3,9 +3,11 @@ package server
 import (
 	"crypto/rand"
 	"fmt"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"time"
 )
 
 type Web struct {
@@ -95,6 +97,12 @@ func (w *Web) ListenAndServe(g *Configuration) {
 
 	r.GET("/ws", func(c *gin.Context) {
 		if w.checkCookieToken(c) {
+			session := sessions.Default(c)
+			token, ok := session.Get("token").(string)
+			if !ok {
+			}
+			spew.Dump(session)
+			spew.Dump(token)
 			w.mux.Handle(c.Writer, c.Request)
 		}
 	})

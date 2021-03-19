@@ -1,12 +1,13 @@
 package server
 
 import (
-	"github.com/gorilla/websocket"
 	"log"
+
+	"github.com/gorilla/websocket"
 )
 
 type Conn struct {
-	Uses   *User
+	//User   *User
 	Output chan []byte
 	socket *websocket.Conn
 	mux    *Mux

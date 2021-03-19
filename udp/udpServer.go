@@ -3,9 +3,10 @@ package udp
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/denautonomepirat/goboat/boat"
 	"log"
 	"net"
+
+	"github.com/denautonomepirat/goboat/boat"
 )
 
 type UdpServer struct {
@@ -17,7 +18,8 @@ func NewUdpServer(port string) *UdpServer {
 
 	udpServer := UdpServer{
 		Recieve: make(chan *boat.Boat),
-		service: GetIpOfRednet() + ":" + port,
+		//		service: GetIpOfRednet() + ":" + port,
+		service: "127.0.0.1:3030",
 	}
 	go udpServer.loop()
 	return &udpServer
