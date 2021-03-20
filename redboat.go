@@ -2,12 +2,13 @@ package main
 
 import (
 	"flag"
-	"github.com/denautonomepirat/goboat/boat"
-	"github.com/denautonomepirat/goboat/udp"
 	"log"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/denautonomepirat/goboat/boat"
+	"github.com/denautonomepirat/goboat/udp"
 )
 
 var addr = flag.String("addr", "46.101.213.117:8080", "http service address")

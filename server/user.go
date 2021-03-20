@@ -4,10 +4,11 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/json"
-	"golang.org/x/crypto/scrypt"
 	"io"
 	"log"
 	"time"
+
+	"golang.org/x/crypto/scrypt"
 )
 
 type User struct {
@@ -61,9 +62,9 @@ func (u *User) CheckPassword(passwordToTest string) bool {
 }
 
 type Skipper struct {
-	UserName       string        `json:"UserName"bson:"userName`
-	Id             []byte        `json:"id"bson:"id"`
-	ConnectedAt    time.Time     `json:"connectedAt"bson:"connectedAt"`
+	UserID         string
+	Authenticated  bool
+	ConnectedAt    time.Time     `json:"connectedAt" bson:"connectedAt"`
 	OnlineDuration time.Duration `json:"onlineDuration"`
 }
 

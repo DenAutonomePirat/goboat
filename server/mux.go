@@ -3,13 +3,11 @@ package server
 import (
 	//"flag"
 	"log"
-	"net/http"
 	//"net/url"
 	//"os"
 	//"os/signal"
 	//"time"
 	"github.com/denautonomepirat/goboat/boat"
-	"github.com/gorilla/websocket"
 )
 
 type Mux struct {
@@ -61,26 +59,4 @@ func (m *Mux) loop() {
 			}
 		}
 	}
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
-// serveWs handles websocket requests from the peer.
-func (m *Mux) Handle(w http.ResponseWriter, r *http.Request) {
-	//get cookie and check validity
-	//deny or accept
-	//if accept set *conn pointer
-
-	ws, err := upgrader.Upgrade(w, r, nil)
-
-	if err != nil {
-		log.Printf("Could not upgrade http request: %s", err.Error())
-		return
-	}
-
-	conn := NewConn(m, ws) //set user pointer
-	m.register <- conn
 }
