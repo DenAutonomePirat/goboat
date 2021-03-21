@@ -1,37 +1,33 @@
 package server
 
 import (
-	"encoding/gob"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/gorilla/websocket"
 )
 
-var cookies *sessions.CookieStore
-
 type Web struct {
-	db      *Store
-	mux     *Mux
-	cookies *sessions.CookieStore
-	router  *mux.Router
-	conf    *Configuration
+	db       *Store
+	mux      *Mux
+	router   *mux.Router
+	conf     *Configuration
+	skippers map[string]*Skipper
 }
 
 func NewWeb(s *Store) *Web {
-	gob.Register(Skipper{})
-	c := sessions.NewCookieStore([]byte("secret"))
-	cookies = c
 	return &Web{
-		mux:     NewMux(),
-		db:      s,
-		router:  mux.NewRouter(),
-		cookies: c,
+		db:       s,
+		mux:      NewMux(),
+		router:   mux.NewRouter(),
+		skippers: make(map[string]*Skipper),
 	}
 }
 
@@ -53,15 +49,6 @@ func (web *Web) api(w http.ResponseWriter, r *http.Request) {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	session, err := cookies.Get(r, "cookie-name")
-	if err != nil {
-
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Println(getSkipper(session).Authenticated)
-
 	http.ServeFile(w, r, "./server/assets/index.html")
 }
 
@@ -70,10 +57,12 @@ func (web *Web) auth(w http.ResponseWriter, r *http.Request) {
 	u := NewUser()
 	uname := r.Form.Get("u")
 	pwd := r.Form.Get("p")
-	u, _ = web.db.getUser(uname)
+	u, err := web.db.getUser(uname)
+	if err != nil {
+		fmt.Println("user not found")
+	}
 
 	if u.CheckPassword(pwd) {
-		session, err := web.cookies.Get(r, "redboat")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -83,14 +72,22 @@ func (web *Web) auth(w http.ResponseWriter, r *http.Request) {
 			Authenticated: true,
 			ConnectedAt:   time.Now(),
 		}
-
-		session.Values["skipper"] = s
-
-		err = session.Save(r, w)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		temp := make([]byte, 16)
+		rand.Read(temp)
+		web.skippers[string(temp)] = s
+		ck := http.Cookie{
+			Name:     "redboat",
+			Value:    "gnarls",
+			Path:     "/",
+			Domain:   "",
+			Expires:  time.Now().Add(time.Hour * 3),
+			Secure:   false,
+			HttpOnly: true,
+			SameSite: 0,
 		}
+
+		http.SetCookie(w, &ck)
+
 		fmt.Printf("User %s Signed in\n", u.UserName)
 		http.Redirect(w, r, "/", http.StatusFound)
 
@@ -107,25 +104,8 @@ var upgrader = websocket.Upgrader{
 
 // serveWs handles websocket requests from the peer.
 func (web *Web) serveWS(w http.ResponseWriter, r *http.Request) {
-	session, err := web.cookies.Get(r, "redboat")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	skipper := getSkipper(session)
-
-	fmt.Println(skipper.UserID)
-
-	if auth := skipper.Authenticated; !auth {
-		err = session.Save(r, w)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		//		http.Redirect(w, r, "/forbidden", http.StatusFound)
-		return
-	}
+	ck, _ := r.Cookie("redboat")
+	spew.Dump(ck.Value)
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 

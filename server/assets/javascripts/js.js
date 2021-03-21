@@ -59,7 +59,9 @@ $(function() {
 
 
 });
-
+function alertCookie() {
+	alert(document.cookie);
+  }
 
 function myYRangeFunction(range) {
   // TODO implement your calculation using range.min and range.max

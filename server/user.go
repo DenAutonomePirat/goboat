@@ -12,10 +12,10 @@ import (
 )
 
 type User struct {
-	UserName       string    `json:"userName"bson:"userName"`
+	UserName       string    `json:"userName" bson:"userName"`
 	HashedPassword []byte    `bson:"hashedPassword"`
 	Salt           []byte    `bson:"salt"`
-	Created        time.Time `json:"created"bson:"created"`
+	Created        time.Time `json:"created" bson:"created"`
 	Online         bool      `json:"online"`
 	connection     *Conn
 }

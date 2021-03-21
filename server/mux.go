@@ -24,11 +24,12 @@ type Mux struct {
 
 func NewMux() *Mux {
 
-	mux := Mux{connections: make(map[*Conn]bool),
-		Broadcast:  make(chan boat.Muxable),
-		Recieve:    make(chan []byte),
-		register:   make(chan *Conn),
-		unregister: make(chan *Conn),
+	mux := Mux{
+		connections: make(map[*Conn]bool),
+		Broadcast:   make(chan boat.Muxable),
+		Recieve:     make(chan []byte),
+		register:    make(chan *Conn),
+		unregister:  make(chan *Conn),
 	}
 	go mux.loop()
 
