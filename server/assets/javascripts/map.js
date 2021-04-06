@@ -4,10 +4,10 @@
  *
  * Wrapping function is needed to preserve L.Marker.update function
  */
-(function () {
+(function() {
     var _old__setPos = L.Marker.prototype._setPos;
     L.Marker.include({
-        _updateImg: function (i, a, s) {
+        _updateImg: function(i, a, s) {
             a = L.point(s).divideBy(2)._subtract(L.point(a));
             var transform = '';
             transform += ' translate(' + -a.x + 'px, ' + -a.y + 'px)';
@@ -16,13 +16,13 @@
             i.style[L.DomUtil.TRANSFORM] += transform;
         },
 
-        setIconAngle: function (iconAngle) {
+        setIconAngle: function(iconAngle) {
             this.options.iconAngle = iconAngle;
             if (this._map)
                 this.update();
         },
 
-        _setPos: function (pos) {
+        _setPos: function(pos) {
             if (this._icon)
                 this._icon.style[L.DomUtil.TRANSFORM] = '';
             if (this._shadow)
@@ -67,18 +67,42 @@ function Map() {
 }
 
 
-L.Map.prototype.updateGame = function () {
-    this.route.setLatLngs([this.boat.getLatLng(), this.firstWaypoint.getLatLng(), this.secondWaypoint.getLatLng(), this.markerFinish.getLatLng()]);
+L.Map.prototype.updateGame = function() {
+    this.route.setLatLngs([this.boat.getLatLng(), this.firstWaypoint.getLatLng(), this.markerFinish.getLatLng()]);
     this.boat.setIconAngle(currentRotation / Math.PI * -180);
     this.boat.setLatLng([currentLat, currentLon]);
+    this.route2.setLatLngs([this.boat.getLatLng(), [currentGoal[0], currentGoal[1]]]);
 
 
 };
 
+L.Map.prototype.ding = function(d) {
+    console.log(d);
+    this.dingPop.setLatLng([d.position.Lat / Math.PI * 180, d.position.Lng / Math.PI * 180]).setContent(d.user).openOn(this);
+};
 
-L.Map.prototype.initGame = function (data) {
+L.Map.prototype.dong = function(d) {
+    console.log(d)
+
+    currentGoal = [d.position.Lat / Math.PI * 180, d.position.Lng / Math.PI * 180];
+    this.dongMarker.setLatLng(currentGoal);
+};
 
 
+L.Map.prototype.initGame = function(data) {
+
+    this.dingPop = L.popup({
+        closeButton: true,
+        autoClose: true,
+        className: "custom-popup"
+    });
+
+    this.dingIcon = L.icon({
+        iconUrl: 'images/ding.png',
+        iconSize: [10, 10],
+        iconAnchor: [5, 5],
+        popupAnchor: [5, 5]
+    });
     this.boatIcon = L.icon({
         iconUrl: 'images/boat.png',
         iconSize: [18, 44],
@@ -122,6 +146,13 @@ L.Map.prototype.initGame = function (data) {
 
     this.boat.addTo(this);
 
+    this.dongMarker = L.marker([currentLat, currentLon], {
+        draggable: false,
+        icon: this.dingIcon,
+    });
+
+    this.dongMarker.addTo(this);
+
     this.firstWaypoint = L.marker([56.71091, 8.2267], {
         draggable: true,
         title: "first"
@@ -129,14 +160,8 @@ L.Map.prototype.initGame = function (data) {
 
     this.firstWaypoint.addTo(this);
 
-    this.secondWaypoint = L.marker([56.69659, 8.23975], {
-        draggable: true,
-        title: "second"
 
-    });
-    this.secondWaypoint.addTo(this);
-
-    this.pointList = [this.boat.getLatLng(), this.firstWaypoint.getLatLng(), this.secondWaypoint.getLatLng(), this.markerFinish.getLatLng()];
+    this.pointList = [this.boat.getLatLng(), this.firstWaypoint.getLatLng(), this.markerFinish.getLatLng()];
 
     this.route = new L.Polyline(this.pointList, {
         color: 'red',
@@ -147,20 +172,31 @@ L.Map.prototype.initGame = function (data) {
     });
     this.route.addTo(this);
 
+    this.pointList1 = [this.boat.getLatLng(), this.markerFinish.getLatLng()];
+
+    this.route2 = new L.Polyline(this.pointList1, {
+        color: 'green',
+        weight: 3,
+        opacity: 0.5,
+        smoothFactor: 0
+
+    });
+    this.route2.addTo(this);
+
 };
 
-L.Marker.prototype.on('dragend', function (e) {
+L.Marker.prototype.on('dragend', function(e) {
     var msg = {
         class: "command",
-        waypoint:{
+        waypoint: {
             position: e.target.getLatLng(),
             name: e.target.options.title,
-        } 
+        }
     };
     console.log(e);
     skipper.send(JSON.stringify(msg));
 });
 
 //L.Marker.prototype.on('move', function(){
-    //skipper.map.updateGame();
+//skipper.map.updateGame();
 //});

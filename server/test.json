@@ -1,0 +1,13 @@
+{
+    "user": "thomas" 
+    "payload" : {
+        "class": "command",
+        "waypoint": {
+            "position": {
+                "lat": 56.92399477907075,
+                "lng": 8.77532958984375
+            },
+            "name": "second"
+        }
+    }
+}

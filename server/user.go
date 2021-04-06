@@ -60,14 +60,3 @@ func (u *User) CheckPassword(passwordToTest string) bool {
 	return false
 
 }
-
-type Skipper struct {
-	UserID         string
-	Authenticated  bool
-	ConnectedAt    time.Time     `json:"connectedAt" bson:"connectedAt"`
-	OnlineDuration time.Duration `json:"onlineDuration"`
-}
-
-func name() {
-
-}

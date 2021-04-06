@@ -7,7 +7,7 @@ import (
 )
 
 type Conn struct {
-	//User   *User
+	user   string
 	Output chan []byte
 	socket *websocket.Conn
 	mux    *Mux
@@ -45,10 +45,14 @@ func (c *Conn) read() {
 	}()
 
 	for {
-		_, msg, err := c.socket.ReadMessage()
+		_, payload, err := c.socket.ReadMessage()
 		if err != nil {
 			log.Printf("Error reading message from %p: %s", c, err.Error())
 			break
+		}
+		msg := &message{
+			user:    c.user,
+			payload: payload,
 		}
 		c.mux.Recieve <- msg
 	}

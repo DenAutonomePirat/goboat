@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css">
     <title></title>
-    
-  </head>
-  <body>
+
+</head>
+
+<body>
     <div id="mapdiv">
-      <button onclick="alertCookie()">Show cookies</button>
-      <div id="map">
-        <div id="model">
-          <div id="modelSTL">
-          </div>
+        <div id="map">
+            <div id="model">
+                <form action="/logout">
+                    <input type="submit" value="Logout" />
+                </form>
+
+                <div id="modelSTL">
+                </div>
+            </div>
+            <canvas id="chart" width="600" height="200"></canvas>
         </div>
-      <canvas id="chart" width="600" height="200"></canvas>
-      </div>
     </div>
     <script src="/javascripts/smoothie.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -26,5 +31,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
     <script src="/javascripts/STLLoader.js"></script>
     <script src="/javascripts/model.js"></script>
-  </body>
+</body>
+
 </html>

@@ -1,55 +1,83 @@
 package server
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"github.com/gorilla/websocket"
 )
 
+type session struct {
+	UserID         string
+	Authenticated  bool
+	ConnectedAt    time.Time     `json:"connectedAt" bson:"connectedAt"`
+	OnlineDuration time.Duration `json:"onlineDuration"`
+}
+
 type Web struct {
-	db       *Store
-	mux      *Mux
-	router   *mux.Router
-	conf     *Configuration
-	skippers map[string]*Skipper
+	db         *Store
+	mux        *Mux
+	router     *mux.Router
+	conf       *Configuration
+	sessions   map[string]*session
+	skipperReg chan string
 }
 
 func NewWeb(s *Store) *Web {
 	return &Web{
-		db:       s,
-		mux:      NewMux(),
-		router:   mux.NewRouter(),
-		skippers: make(map[string]*Skipper),
+		db:         s,
+		mux:        NewMux(),
+		router:     mux.NewRouter(),
+		sessions:   make(map[string]*session),
+		skipperReg: make(chan string),
 	}
 }
 
 func (web *Web) ListenAndServe(g *Configuration) {
 	web.conf = g
-	web.router.HandleFunc("/", index)
+	web.router.HandleFunc("/", web.index)
 	web.router.HandleFunc("/login", web.login).Methods("get")
 	web.router.HandleFunc("/login", web.auth).Methods("post")
+	web.router.HandleFunc("/logout", web.logout)
 	web.router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		web.serveWS(w, r)
 	})
 	web.router.HandleFunc("/api/gamesetup", web.api)
 	web.router.PathPrefix("/").Handler(http.FileServer(http.Dir("./server/assets")))
-	http.ListenAndServe(":8080", web.router)
+	http.ListenAndServeTLS(":80", "/etc/letsencrypt/live/cow.hopto.org/cert.pem", "/etc/letsencrypt/live/cow.hopto.org/privkey.pem", web.router)
 }
 
 func (web *Web) api(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, web.conf)
 }
 
-func index(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./server/assets/index.html")
+func (web *Web) index(w http.ResponseWriter, r *http.Request) {
+	if web.isAuthenticated(w, r) {
+		fmt.Println("Serving da shit")
+		http.ServeFile(w, r, "./server/assets/index.html")
+	} else {
+		http.Redirect(w, r, "/login", 303)
+	}
+}
+
+func (web *Web) logout(w http.ResponseWriter, r *http.Request) {
+	ck, err := r.Cookie("redboat")
+	if err != nil {
+		http.Redirect(w, r, "/login", 303)
+	}
+	s, ok := web.sessions[ck.Value]
+	if ok {
+		fmt.Printf("deleting session for %s\n", s.UserID)
+		web.skipperReg <- s.UserID
+		delete(web.sessions, ck.Value)
+	}
+
+	http.Redirect(w, r, "/login", 303)
 }
 
 func (web *Web) auth(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +87,11 @@ func (web *Web) auth(w http.ResponseWriter, r *http.Request) {
 	pwd := r.Form.Get("p")
 	u, err := web.db.getUser(uname)
 	if err != nil {
-		fmt.Println("user not found")
+		fmt.Printf("creating user %s", uname)
+		u.UserName = uname
+		u.SetPassword(pwd)
+		web.db.AddUser(u)
+		time.Sleep(time.Second)
 	}
 
 	if u.CheckPassword(pwd) {
@@ -67,17 +99,16 @@ func (web *Web) auth(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		s := &Skipper{
+		s := &session{
 			UserID:        u.UserName,
 			Authenticated: true,
 			ConnectedAt:   time.Now(),
 		}
-		temp := make([]byte, 16)
-		rand.Read(temp)
-		web.skippers[string(temp)] = s
+		random := RandomString(16)
+		web.sessions[random] = s
 		ck := http.Cookie{
 			Name:     "redboat",
-			Value:    "gnarls",
+			Value:    random,
 			Path:     "/",
 			Domain:   "",
 			Expires:  time.Now().Add(time.Hour * 3),
@@ -102,34 +133,48 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-// serveWs handles websocket requests from the peer.
-func (web *Web) serveWS(w http.ResponseWriter, r *http.Request) {
-	ck, _ := r.Cookie("redboat")
-	spew.Dump(ck.Value)
+func (web *Web) isAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 
-	ws, err := upgrader.Upgrade(w, r, nil)
-
+	ck, err := r.Cookie("redboat")
 	if err != nil {
-		log.Printf("Could not upgrade http request: %s", err.Error())
-		return
+		return false
 	}
+	s := web.sessions[ck.Value]
+	if s == nil {
+		return false
+	}
+	return s.Authenticated
 
-	conn := NewConn(web.mux, ws)
-	web.mux.register <- conn
 }
 
-// getUser returns a user from session s
-// on error returns an empty user
-func getSkipper(s *sessions.Session) *Skipper {
-	val := s.Values["skipper"]
-	skipper, ok := val.(*Skipper)
-	if !ok {
-		fmt.Println("not found in cookiejar")
-		return &Skipper{Authenticated: false}
-	}
-	fmt.Println("found in cookiejar")
+func (web *Web) getSession(w http.ResponseWriter, r *http.Request) *session {
 
-	return skipper
+	ck, err := r.Cookie("redboat")
+	if err != nil {
+		return &session{
+			UserID:         "",
+			Authenticated:  false,
+			ConnectedAt:    time.Time{},
+			OnlineDuration: 0,
+		}
+	}
+	s := web.sessions[ck.Value]
+	return s
+}
+
+// serveWs handles websocket requests from the peer.
+func (web *Web) serveWS(w http.ResponseWriter, r *http.Request) {
+	if web.isAuthenticated(w, r) {
+		ws, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Printf("Could not upgrade http request: %s", err.Error())
+			return
+		}
+		conn := NewConn(web.mux, ws)
+		conn.user = web.getSession(w, r).UserID
+		web.mux.register <- conn
+		return
+	}
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
@@ -195,3 +240,12 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	router.Run()
 }
 */
+func RandomString(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+	s := make([]rune, n)
+	for i := range s {
+		s[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(s)
+}

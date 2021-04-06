@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/golang/geo/s2"
 )
 
 func CheckGracefull(err error) {
@@ -20,6 +22,7 @@ func Check(err error) {
 }
 
 type Command struct {
+	User     string
 	Class    string `json:"class"`
 	Waypoint struct {
 		Coordinate struct {
@@ -28,6 +31,17 @@ type Command struct {
 		} `json:"position"`
 		Name string `json:"name"`
 	} `json:"waypoint"`
+}
+
+type Ding struct {
+	Class    string     `json:"class"`
+	User     string     `json:"user"`
+	Position *s2.LatLng `json:"position"`
+}
+
+func (d *Ding) Marshal() *[]byte {
+	encoded, _ := json.Marshal(d)
+	return &encoded
 }
 
 type Boat struct {
