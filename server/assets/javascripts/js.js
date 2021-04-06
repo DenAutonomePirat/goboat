@@ -154,7 +154,7 @@ Skipper.prototype.send = function(msg) {
 }
 
 function httpGet(theUrl) {
-    var xmlHttp = new XMLHttpRequest();
+    var xmlHttp = new XMLHttpsRequest();
     xmlHttp.open("GET", theUrl, false); // false for synchronous request
     xmlHttp.send(null);
     return xmlHttp.responseText;
