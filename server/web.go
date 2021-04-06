@@ -49,7 +49,7 @@ func (web *Web) ListenAndServe(g *Configuration) {
 	})
 	web.router.HandleFunc("/api/gamesetup", web.api)
 	web.router.PathPrefix("/").Handler(http.FileServer(http.Dir("./server/assets")))
-	http.ListenAndServeTLS(":80", "/etc/letsencrypt/live/cow.hopto.org/cert.pem", "/etc/letsencrypt/live/cow.hopto.org/privkey.pem", web.router)
+	http.ListenAndServe(":80", web.router)
 }
 
 func (web *Web) api(w http.ResponseWriter, r *http.Request) {
